@@ -1,13 +1,152 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>promptipromptverse</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PromptVerse</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">PV</div>
+        <div class="brand-copy">
+          <span class="brand-name">PromptVerse</span>
+          <span class="brand-tag">AI prompt gallery</span>
+        </div>
+      </div>
+
+      <div class="navbar-controls">
+        <div class="search-field compact">
+          <input id="navSearch" type="search" placeholder="Search prompts" aria-label="Search prompts">
+          <button class="search-btn" aria-label="Search"><span>🔎</span></button>
+        </div>
+
+        <nav class="nav-links">
+          <button class="nav-pill active" data-category="all">All</button>
+          <button class="nav-pill" data-category="Fantasy">Fantasy</button>
+          <button class="nav-pill" data-category="Anime">Anime</button>
+          <button class="nav-pill" data-category="AI Chibi">Chibi</button>
+        </nav>
+      </div>
+
+      <div class="top-actions">
+        <button id="modeToggle" class="icon-btn" aria-label="Toggle dark mode">🌙</button>
+        <button class="btn btn-primary">Login</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero-panel">
+        <div class="hero-copy">
+          <span class="eyebrow">Discover inspiring prompts</span>
+          <h1>PromptVerse: Your AI prompt gallery for creative storytelling.</h1>
+          <p>Find, save, and launch beautifully crafted AI prompts for art, fiction, avatars, and creative ideas.</p>
+
+          <div class="hero-actions">
+            <div class="search-field hero">
+              <input id="heroSearch" type="search" placeholder="Search prompt ideas..." aria-label="Search prompt ideas">
+              <button class="search-btn">Search</button>
+            </div>
+            <button id="exploreBtn" class="btn btn-secondary">Explore now</button>
+          </div>
+        </div>
+
+        <div class="hero-visual">
+          <div class="hero-card glass-card">
+            <div class="hero-card-top">
+              <span>Trending prompt</span>
+              <div class="badge">New</div>
+            </div>
+            <h2>“Dreamy anime sunset scene with neon clouds and floating lanterns.”</h2>
+            <div class="hero-card-meta">
+              <span>Art inspiration</span>
+              <span>+1.2k saves</span>
+            </div>
+          </div>
+          <div class="hero-dot-grid"></div>
+        </div>
+      </section>
+
+      <section class="section intro-section">
+        <div class="section-header">
+          <div>
+            <h2>Explore categories</h2>
+            <p>Quickly filter prompts by style, mood, and story type.</p>
+          </div>
+          <span class="section-tag">Pick your vibe</span>
+        </div>
+
+        <div class="category-grid" id="categoryGrid"></div>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <div>
+            <h2>Trending prompts</h2>
+            <p>Curated AI prompt cards with hover interactions, bookmarking, and fast filtering.</p>
+          </div>
+          <span class="section-tag">Trending now</span>
+        </div>
+
+        <div class="masonry-grid" id="promptGrid"></div>
+      </section>
+
+      <section class="section highlight-panel">
+        <div class="panel-copy">
+          <h2>Most bookmarked</h2>
+          <p>Save your favorite prompts and keep your best ideas ready to launch.</p>
+        </div>
+        <div class="panel-cards" id="popularList"></div>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <div>
+            <h2>Latest prompts</h2>
+            <p>Fresh prompt ideas updated for every creative session.</p>
+          </div>
+          <span class="section-tag">New arrivals</span>
+        </div>
+
+        <div class="latest-list" id="latestList"></div>
+      </section>
+    </main>
+
+    <footer class="footer-shell">
+      <div>
+        <h3>PromptVerse</h3>
+        <p>Built for creators, storytellers, and dreamers who want bold AI prompts in a polished gallery.</p>
+      </div>
+      <div class="footer-links">
+        <a href="#">Support</a>
+        <a href="#">Terms</a>
+        <a href="#">Privacy</a>
+      </div>
+    </footer>
+  </div>
+
+  <div id="promptModal" class="modal-backdrop hidden" aria-hidden="true">
+    <div class="modal-panel glass-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <button id="closeModal" class="close-btn" aria-label="Close modal">×</button>
+      <div class="modal-grid">
+        <div class="modal-image" id="modalImage"></div>
+        <div class="modal-copy">
+          <span class="eyebrow">Prompt detail</span>
+          <h2 id="modalTitle">Prompt title</h2>
+          <p id="modalText">Prompt content will appear here.</p>
+          <div class="modal-actions">
+            <button id="copyPrompt" class="btn btn-primary">Copy prompt</button>
+            <button id="openChatGPT" class="btn btn-secondary">Open in ChatGPT</button>
+            <button id="openGemini" class="btn btn-secondary">Open in Gemini</button>
+          </div>
+          <button id="toggleBookmark" class="btn btn-outline">Bookmark</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
 </html>
