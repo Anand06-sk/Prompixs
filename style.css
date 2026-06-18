@@ -1129,3 +1129,35 @@ a:focus-visible, button:focus-visible, input:focus-visible {
   outline: 2px solid var(--purple-deep);
   outline-offset: 2px;
 }
+
+/* ---------- Like Button Styling ---------- */
+.card-like-btn {
+  transition: all 0.2s ease;
+}
+
+.card-like-btn.liked i {
+  color: #ef4444;
+}
+
+.card-like-btn:hover:not(.liked) i {
+  color: #f5a6a6;
+}
+
+/* Modal Like Button */
+#modalLikeBtn {
+  transition: all 0.2s ease;
+}
+
+#modalLikeBtn.liked {
+  background-color: #ef4444 !important;
+  border-color: #ef4444 !important;
+  color: white;
+}
+
+#modalLikeBtn.liked i {
+  color: white;
+}
+
+#modalLikeBtn:hover {
+  background-color: #dc2626 !important;
+}
