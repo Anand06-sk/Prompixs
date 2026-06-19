@@ -10,6 +10,11 @@ import {
   getPromptMetrics,
   listenToPromptMetrics,
   listenToUserLikeStatus,
+  toggleUserBookmark,
+  getUserBookmarkStatus,
+  getUserBookmarks,
+  getUserBookmarkCount,
+  listenToUserBookmarks,
 } from "./firestore-service.js";
 
 import { auth } from "./firebase-config.js";
@@ -20,15 +25,45 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
 
   // Store for tracking real-time listeners
   const firestoreListeners = {};
+  let bookmarkListener = null;
 
   // Monitor auth state changes
   let currentUser = null;
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, async (user) => {
     currentUser = user;
     console.log(
       "Auth state changed:",
       currentUser ? "Logged in" : "Logged out",
     );
+    
+    // Clean up previous bookmark listener
+    if (bookmarkListener) {
+      bookmarkListener();
+      bookmarkListener = null;
+    }
+    
+    if (currentUser) {
+      // User logged in - load bookmarks from Firestore
+      console.log("Loading bookmarks from Firestore for user:", currentUser.uid);
+      const userBookmarks = await getUserBookmarks();
+      state.bookmarks = new Set(userBookmarks);
+      updateBookmarkCount();
+      
+      // Set up real-time listener for bookmarks
+      bookmarkListener = listenToUserBookmarks((bookmarkedIds) => {
+        state.bookmarks = new Set(bookmarkedIds);
+        updateBookmarkCount();
+        // Refresh all cards to show correct bookmark state
+        refreshAllCardBookmarkStates();
+      });
+    } else {
+      // User logged out - load bookmarks from localStorage
+      state.bookmarks = new Set(
+        JSON.parse(localStorage.getItem("pv_bookmarks") || "[]"),
+      );
+      updateBookmarkCount();
+    }
+    
     // Update UI when auth state changes
     updateAuthUI();
   });
@@ -202,7 +237,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
 
     // Save button
     const saveBtn = card.querySelector(".card-save-btn");
-    saveBtn.addEventListener("click", (e) => {
+    saveBtn.addEventListener("click", async (e) => {
       e.stopPropagation();
       if (!isLoggedIn()) {
         // redirect to auth page and request bookmark after login
@@ -215,8 +250,8 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
         );
         return;
       }
-      toggleBookmark(p.id);
-      saveBtn.classList.toggle("saved", state.bookmarks.has(p.id));
+      await toggleBookmark(p.id);
+      // UI will be updated by real-time listener or state change
     });
 
     // Like button
@@ -432,16 +467,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
     bookmarkCountEl.textContent = state.bookmarks.size;
   }
 
-  function toggleBookmark(id) {
-    if (state.bookmarks.has(id)) {
-      state.bookmarks.delete(id);
-      showToast("Removed from bookmarks", "fa-solid fa-bookmark-slash");
-    } else {
-      state.bookmarks.add(id);
-      showToast("Saved to bookmarks", "fa-solid fa-bookmark");
-    }
-    saveBookmarks();
-    // refresh all rendered cards' bookmark state
+  function refreshAllCardBookmarkStates() {
     $$(".card-save-btn").forEach((btn) => {
       const bid = btn.dataset.id;
       const saved = state.bookmarks.has(bid);
@@ -449,7 +475,37 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
       btn.querySelector("i").className =
         `fa-${saved ? "solid" : "regular"} fa-bookmark`;
     });
-    if (currentModalId === id) syncModalBookmarkButton(id);
+    if (currentModalId) syncModalBookmarkButton(currentModalId);
+  }
+
+  async function toggleBookmark(id) {
+    if (isLoggedIn()) {
+      // For logged-in users, use Firebase
+      const result = await toggleUserBookmark(id);
+      if (result.success) {
+        const message = result.bookmarked
+          ? "Saved to bookmarks"
+          : "Removed from bookmarks";
+        const icon = result.bookmarked
+          ? "fa-solid fa-bookmark"
+          : "fa-solid fa-bookmark-slash";
+        showToast(message, icon);
+        // The real-time listener will handle updating state.bookmarks and UI
+      } else {
+        showToast(result.message || "Error", "fa-solid fa-exclamation-circle");
+      }
+    } else {
+      // For anonymous users, use localStorage
+      if (state.bookmarks.has(id)) {
+        state.bookmarks.delete(id);
+        showToast("Removed from bookmarks", "fa-solid fa-bookmark-slash");
+      } else {
+        state.bookmarks.add(id);
+        showToast("Saved to bookmarks", "fa-solid fa-bookmark");
+      }
+      saveBookmarks();
+      refreshAllCardBookmarkStates();
+    }
   }
 
   /* ---------------------------------------------------------
@@ -534,8 +590,8 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
     }
   });
 
-  $("#modalBookmarkBtn").addEventListener("click", () => {
-    if (currentModalId) toggleBookmark(currentModalId);
+  $("#modalBookmarkBtn").addEventListener("click", async () => {
+    if (currentModalId) await toggleBookmark(currentModalId);
   });
 
   // Modal like button handler
