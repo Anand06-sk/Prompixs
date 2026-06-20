@@ -406,10 +406,11 @@
     <script type="module">
       import { logoutUser, resendVerificationEmail } from "./auth.js";
       import { auth } from "./firebase-config.js";
+      import { getUserBookmarks } from "./firestore-service.js";
       import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
       // Auth check and load
-      onAuthStateChanged(auth, (user) => {
+      onAuthStateChanged(auth, async (user) => {
         if (!user) {
           // User not logged in - redirect to auth page
           window.location.href = "auth.html?next=profile.html";
@@ -447,28 +448,27 @@
         showVerificationStatus(user);
       });
 
-      // Load bookmarks - for this MVP, we'll show the saved IDs
-      const bookmarkIds = JSON.parse(
-        localStorage.getItem("pv_bookmarks") || "[]",
-      );
-      document.getElementById("bookmarkCount").textContent = bookmarkIds.length;
-      document.getElementById("totalBookmarks").textContent =
-        bookmarkIds.length;
+        // Load bookmarks from Firestore for logged-in user
+        const bookmarkIds = await getUserBookmarks();
+        document.getElementById("bookmarkCount").textContent = bookmarkIds.length;
+        document.getElementById("totalBookmarks").textContent =
+          bookmarkIds.length;
 
-      if (bookmarkIds.length === 0) {
-        document.getElementById("emptyBookmarks").hidden = false;
-        document.getElementById("bookmarksContainer").hidden = true;
-      } else {
-        document.getElementById("emptyBookmarks").hidden = true;
-        // Display placeholder bookmarks info
-        document.getElementById("bookmarksContainer").innerHTML = `
-        <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-soft);">
-          <i class="fa-solid fa-info-circle" style="font-size: 1.5rem; margin-bottom: 12px; display: block; color: var(--purple);"></i>
-          <p>You have ${bookmarkIds.length} saved prompt${bookmarkIds.length !== 1 ? "s" : ""}</p>
-          <p style="font-size: 0.9rem; margin-top: 8px;">Full bookmark display coming soon</p>
-        </div>
-      `;
-      }
+        if (bookmarkIds.length === 0) {
+          document.getElementById("emptyBookmarks").hidden = false;
+          document.getElementById("bookmarksContainer").hidden = true;
+        } else {
+          document.getElementById("emptyBookmarks").hidden = true;
+          // Display placeholder bookmarks info
+          document.getElementById("bookmarksContainer").innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-soft);">
+            <i class="fa-solid fa-info-circle" style="font-size: 1.5rem; margin-bottom: 12px; display: block; color: var(--purple);"></i>
+            <p>You have ${bookmarkIds.length} saved prompt${bookmarkIds.length !== 1 ? "s" : ""}</p>
+            <p style="font-size: 0.9rem; margin-top: 8px;">Full bookmark display coming soon</p>
+          </div>
+        `;
+        }
+      });
 
       // Email verification status
       function showVerificationStatus(user) {
