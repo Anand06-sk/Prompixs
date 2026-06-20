@@ -12,6 +12,14 @@ import {
   listenToUserLikeStatus,
 } from "./firestore-service.js";
 
+import {
+  addBookmark,
+  removeBookmark,
+  isPromptBookmarked,
+  getUserBookmarks,
+  getBookmarkCount,
+} from "./user-service.js";
+
 import { auth } from "./firebase-config.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
@@ -23,12 +31,14 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
 
   // Monitor auth state changes
   let currentUser = null;
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, async (user) => {
     currentUser = user;
     console.log(
       "Auth state changed:",
-      currentUser ? "Logged in" : "Logged out",
+      currentUser ? "Logged in as " + currentUser.email : "Logged out",
     );
+    // Load bookmarks from Firebase when user logs in/out
+    await loadUserBookmarks();
     // Update UI when auth state changes
     updateAuthUI();
   });
@@ -73,15 +83,27 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
   const state = {
     activeCategory: null,
     searchTerm: "",
-    bookmarks: new Set(
-      JSON.parse(localStorage.getItem("pv_bookmarks") || "[]"),
-    ),
+    bookmarks: new Set(), // Will be populated from Firebase
   };
 
-  const saveBookmarks = () => {
-    localStorage.setItem("pv_bookmarks", JSON.stringify([...state.bookmarks]));
-    updateBookmarkCount();
-  };
+  // Load user's bookmarks from Firebase
+  async function loadUserBookmarks() {
+    if (!currentUser) {
+      state.bookmarks.clear();
+      updateBookmarkCount();
+      return;
+    }
+
+    try {
+      const userBookmarks = await getUserBookmarks();
+      state.bookmarks = new Set(userBookmarks.map((b) => b.promptId || b.id));
+      console.log("📚 Loaded", state.bookmarks.size, "bookmarks from Firebase");
+      updateBookmarkCount();
+    } catch (error) {
+      console.error("Error loading bookmarks:", error);
+      state.bookmarks.clear();
+    }
+  }
 
   /* ---------------------------------------------------------
      4. DOM REFS
@@ -202,7 +224,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
 
     // Save button
     const saveBtn = card.querySelector(".card-save-btn");
-    saveBtn.addEventListener("click", (e) => {
+    saveBtn.addEventListener("click", async (e) => {
       e.stopPropagation();
       if (!isLoggedIn()) {
         // redirect to auth page and request bookmark after login
@@ -215,7 +237,18 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
         );
         return;
       }
-      toggleBookmark(p.id);
+
+      // Pass prompt data when toggling bookmark
+      const promptData = {
+        promptId: p.id,
+        title: p.title,
+        category: p.category,
+        image: p.img,
+        prompt: p.prompt,
+        date: p.date,
+      };
+
+      await toggleBookmark(p.id, promptData);
       saveBtn.classList.toggle("saved", state.bookmarks.has(p.id));
     });
 
@@ -432,24 +465,38 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
     bookmarkCountEl.textContent = state.bookmarks.size;
   }
 
-  function toggleBookmark(id) {
-    if (state.bookmarks.has(id)) {
-      state.bookmarks.delete(id);
-      showToast("Removed from bookmarks", "fa-solid fa-bookmark-slash");
-    } else {
-      state.bookmarks.add(id);
-      showToast("Saved to bookmarks", "fa-solid fa-bookmark");
+  async function toggleBookmark(id, promptData = {}) {
+    if (!currentUser) {
+      redirectToAuth("/index.html");
+      return;
     }
-    saveBookmarks();
-    // refresh all rendered cards' bookmark state
-    $$(".card-save-btn").forEach((btn) => {
-      const bid = btn.dataset.id;
-      const saved = state.bookmarks.has(bid);
-      btn.classList.toggle("saved", saved);
-      btn.querySelector("i").className =
-        `fa-${saved ? "solid" : "regular"} fa-bookmark`;
-    });
-    if (currentModalId === id) syncModalBookmarkButton(id);
+
+    try {
+      if (state.bookmarks.has(id)) {
+        // Remove bookmark
+        await removeBookmark(id);
+        state.bookmarks.delete(id);
+        showToast("Removed from bookmarks", "fa-solid fa-bookmark-slash");
+      } else {
+        // Add bookmark
+        await addBookmark(id, promptData);
+        state.bookmarks.add(id);
+        showToast("Saved to bookmarks", "fa-solid fa-bookmark");
+      }
+
+      // Refresh all rendered cards' bookmark state
+      $$(".card-save-btn").forEach((btn) => {
+        const bid = btn.dataset.id;
+        const saved = state.bookmarks.has(bid);
+        btn.classList.toggle("saved", saved);
+        btn.querySelector("i").className =
+          `fa-${saved ? "solid" : "regular"} fa-bookmark`;
+      });
+      if (currentModalId === id) syncModalBookmarkButton(id);
+    } catch (error) {
+      console.error("Error toggling bookmark:", error);
+      showToast("Error updating bookmark", "fa-solid fa-exclamation-circle");
+    }
   }
 
   /* ---------------------------------------------------------
@@ -534,8 +581,23 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
     }
   });
 
-  $("#modalBookmarkBtn").addEventListener("click", () => {
-    if (currentModalId) toggleBookmark(currentModalId);
+  $("#modalBookmarkBtn").addEventListener("click", async () => {
+    if (!currentModalId) return;
+    const p = PROMPTS.find((x) => x.id === currentModalId);
+    if (!p) return;
+
+    // Pass prompt data when toggling bookmark
+    const promptData = {
+      promptId: p.id,
+      title: p.title,
+      category: p.category,
+      image: p.img,
+      prompt: p.prompt,
+      date: p.date,
+    };
+
+    await toggleBookmark(currentModalId, promptData);
+    syncModalBookmarkButton(currentModalId);
   });
 
   // Modal like button handler

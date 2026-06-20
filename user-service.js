@@ -11,6 +11,11 @@ import {
   getDoc,
   updateDoc,
   serverTimestamp,
+  collection,
+  getDocs,
+  deleteDoc,
+  query,
+  where,
 } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
 /**
@@ -341,4 +346,158 @@ export function getVerificationStatus(user) {
     isVerified: false,
     message: `Email not verified. Verification link sent to ${user.email}`,
   };
+}
+
+// ================== BOOKMARK MANAGEMENT ==================
+
+/**
+ * Add a prompt to user's bookmarks in Firestore
+ * @param {string} promptId - ID of the prompt to bookmark
+ * @param {Object} promptData - Prompt data to store (title, category, image, etc)
+ * @returns {Promise<void>}
+ */
+export async function addBookmark(promptId, promptData) {
+  const user = auth.currentUser;
+  
+  if (!user) {
+    throw new Error("User must be logged in to bookmark");
+  }
+
+  if (!promptId) {
+    throw new Error("Prompt ID is required");
+  }
+
+  try {
+    const bookmarkRef = doc(
+      db,
+      "users",
+      user.uid,
+      "bookmarks",
+      promptId
+    );
+
+    await setDoc(bookmarkRef, {
+      promptId,
+      ...promptData,
+      bookmarkedAt: serverTimestamp(),
+    });
+
+    console.log("📌 Prompt bookmarked:", promptId);
+  } catch (error) {
+    console.error("Error adding bookmark:", error);
+    throw error;
+  }
+}
+
+/**
+ * Remove a prompt from user's bookmarks
+ * @param {string} promptId - ID of the prompt to remove from bookmarks
+ * @returns {Promise<void>}
+ */
+export async function removeBookmark(promptId) {
+  const user = auth.currentUser;
+
+  if (!user) {
+    throw new Error("User must be logged in to remove bookmarks");
+  }
+
+  if (!promptId) {
+    throw new Error("Prompt ID is required");
+  }
+
+  try {
+    const bookmarkRef = doc(
+      db,
+      "users",
+      user.uid,
+      "bookmarks",
+      promptId
+    );
+
+    await deleteDoc(bookmarkRef);
+    console.log("❌ Bookmark removed:", promptId);
+  } catch (error) {
+    console.error("Error removing bookmark:", error);
+    throw error;
+  }
+}
+
+/**
+ * Check if a prompt is bookmarked by current user
+ * @param {string} promptId - ID of the prompt to check
+ * @returns {Promise<boolean>} True if bookmarked, false otherwise
+ */
+export async function isPromptBookmarked(promptId) {
+  const user = auth.currentUser;
+
+  if (!user || !promptId) {
+    return false;
+  }
+
+  try {
+    const bookmarkRef = doc(
+      db,
+      "users",
+      user.uid,
+      "bookmarks",
+      promptId
+    );
+
+    const bookmarkDoc = await getDoc(bookmarkRef);
+    return bookmarkDoc.exists();
+  } catch (error) {
+    console.error("Error checking bookmark:", error);
+    return false;
+  }
+}
+
+/**
+ * Get all bookmarks for current user
+ * @returns {Promise<Array>} Array of bookmark objects with all data
+ */
+export async function getUserBookmarks() {
+  const user = auth.currentUser;
+
+  if (!user) {
+    return [];
+  }
+
+  try {
+    const bookmarksRef = collection(db, "users", user.uid, "bookmarks");
+    const snapshot = await getDocs(bookmarksRef);
+
+    const bookmarks = [];
+    snapshot.forEach((doc) => {
+      bookmarks.push({
+        id: doc.id,
+        ...doc.data(),
+      });
+    });
+
+    console.log("📚 Loaded bookmarks for user:", bookmarks.length);
+    return bookmarks;
+  } catch (error) {
+    console.error("Error loading bookmarks:", error);
+    return [];
+  }
+}
+
+/**
+ * Get total bookmark count for current user
+ * @returns {Promise<number>} Number of bookmarks
+ */
+export async function getBookmarkCount() {
+  const user = auth.currentUser;
+
+  if (!user) {
+    return 0;
+  }
+
+  try {
+    const bookmarks = await getUserBookmarks();
+    return bookmarks.length;
+  } catch (error) {
+    console.error("Error getting bookmark count:", error);
+    return 0;
+  }
 }

@@ -405,11 +405,12 @@
 
     <script type="module">
       import { logoutUser, resendVerificationEmail } from "./auth.js";
+      import { getUserBookmarks, getBookmarkCount } from "./user-service.js";
       import { auth } from "./firebase-config.js";
       import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
       // Auth check and load
-      onAuthStateChanged(auth, (user) => {
+      onAuthStateChanged(auth, async (user) => {
         if (!user) {
           // User not logged in - redirect to auth page
           window.location.href = "auth.html?next=profile.html";
@@ -445,29 +446,50 @@
 
         // Show verification status
         showVerificationStatus(user);
+
+        // Load bookmarks from Firebase
+        try {
+          const userBookmarks = await getUserBookmarks();
+          const bookmarkCount = userBookmarks.length;
+
+          document.getElementById("bookmarkCount").textContent = bookmarkCount;
+          document.getElementById("totalBookmarks").textContent = bookmarkCount;
+
+          if (bookmarkCount === 0) {
+            document.getElementById("emptyBookmarks").hidden = false;
+            document.getElementById("bookmarksContainer").hidden = true;
+          } else {
+            document.getElementById("emptyBookmarks").hidden = true;
+            // Display user's bookmarks
+            displayUserBookmarks(userBookmarks);
+          }
+        } catch (error) {
+          console.error("Error loading bookmarks:", error);
+          document.getElementById("emptyBookmarks").hidden = false;
+        }
       });
 
-      // Load bookmarks - for this MVP, we'll show the saved IDs
-      const bookmarkIds = JSON.parse(
-        localStorage.getItem("pv_bookmarks") || "[]",
-      );
-      document.getElementById("bookmarkCount").textContent = bookmarkIds.length;
-      document.getElementById("totalBookmarks").textContent =
-        bookmarkIds.length;
+      // Display user's bookmarks in the grid
+      function displayUserBookmarks(bookmarks) {
+        const container = document.getElementById("bookmarksContainer");
+        container.innerHTML = "";
 
-      if (bookmarkIds.length === 0) {
-        document.getElementById("emptyBookmarks").hidden = false;
-        document.getElementById("bookmarksContainer").hidden = true;
-      } else {
-        document.getElementById("emptyBookmarks").hidden = true;
-        // Display placeholder bookmarks info
-        document.getElementById("bookmarksContainer").innerHTML = `
-        <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-soft);">
-          <i class="fa-solid fa-info-circle" style="font-size: 1.5rem; margin-bottom: 12px; display: block; color: var(--purple);"></i>
-          <p>You have ${bookmarkIds.length} saved prompt${bookmarkIds.length !== 1 ? "s" : ""}</p>
-          <p style="font-size: 0.9rem; margin-top: 8px;">Full bookmark display coming soon</p>
-        </div>
-      `;
+        bookmarks.forEach((bookmark) => {
+          const card = document.createElement("div");
+          card.className = "bookmark-card";
+          card.innerHTML = `
+            <div class="bookmark-image">
+              <img src="${bookmark.image || "https://via.placeholder.com/200x160"}" alt="${bookmark.title || "Prompt"}" />
+            </div>
+            <div class="bookmark-info">
+              <div class="bookmark-title">${bookmark.title || "Untitled Prompt"}</div>
+              <div class="bookmark-category">${bookmark.category || "General"}</div>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+
+        container.hidden = false;
       }
 
       // Email verification status

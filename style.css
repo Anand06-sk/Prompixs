@@ -279,7 +279,7 @@ body.dark .blob { opacity: 0.22; }
 .nav-cat-dropdown button:hover { background: rgba(167,139,250,0.14); color: var(--purple-deep); }
 .nav-cat-dropdown button i { color: var(--pink-deep); width: 16px; text-align: center; }
 
-.nav-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.nav-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; margin-left: auto; }
 .login-btn { padding: 10px 20px; }
 
 .mobile-menu-toggle {
