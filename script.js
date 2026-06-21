@@ -127,11 +127,15 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
 
   async function createPromptCard(p) {
     // VALIDATE: Skip incomplete prompts - no fake/untitled cards
-    if (!p || !p.title || !p.title.trim() || !p.prompt || !p.prompt.trim() || !p.id) {
-      console.warn(
-        "[Card Validation] Skipping incomplete prompt:",
-        p,
-      );
+    if (
+      !p ||
+      !p.title ||
+      !p.title.trim() ||
+      !p.prompt ||
+      !p.prompt.trim() ||
+      !p.id
+    ) {
+      console.warn("[Card Validation] Skipping incomplete prompt:", p);
       return null;
     }
 
@@ -343,9 +347,11 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
       .slice(0, 10);
     bookmarkedRow.innerHTML = "";
     Promise.all(top.map((p) => createPromptCard(p)))
-      .then((cards) => cards
-        .filter((card) => card !== null) // Skip incomplete prompts that returned null
-        .forEach((card) => bookmarkedRow.appendChild(card)))
+      .then((cards) =>
+        cards
+          .filter((card) => card !== null) // Skip incomplete prompts that returned null
+          .forEach((card) => bookmarkedRow.appendChild(card)),
+      )
       .catch((err) => console.error("Error rendering bookmarked cards:", err));
   }
 
@@ -355,9 +361,11 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
       .slice(0, 10);
     latestRow.innerHTML = "";
     Promise.all(latest.map((p) => createPromptCard(p)))
-      .then((cards) => cards
-        .filter((card) => card !== null) // Skip incomplete prompts that returned null
-        .forEach((card) => latestRow.appendChild(card)))
+      .then((cards) =>
+        cards
+          .filter((card) => card !== null) // Skip incomplete prompts that returned null
+          .forEach((card) => latestRow.appendChild(card)),
+      )
       .catch((err) => console.error("Error rendering latest cards:", err));
   }
 
@@ -783,7 +791,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
         const firestorePrompts = [];
         snapshot.forEach((doc) => {
           const data = doc.data();
-          
+
           // ONLY load complete prompts with required fields
           // Skip any incomplete documents
           if (!data.title || !data.prompt) {
@@ -817,9 +825,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
           );
           return true;
         } else {
-          console.log(
-            "[Public Site] No complete prompts found in Firestore",
-          );
+          console.log("[Public Site] No complete prompts found in Firestore");
         }
       } else {
         console.log("[Public Site] Firestore prompts collection is empty");
