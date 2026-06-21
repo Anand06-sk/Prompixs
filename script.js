@@ -485,11 +485,11 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
   }
 
   function renderBookmarkedRow() {
-    // Filter by active category and search term, then sort by bookmarks
+    // Filter by active category and search term, then sort by views
     const filtered = getFilteredPrompts();
     const top = [...filtered]
-      .sort((a, b) => b.bookmarks - a.bookmarks)
-      .slice(0, 10);
+      .sort((a, b) => b.views - a.views)
+      .slice(0, 15);
     bookmarkedRow.innerHTML = "";
     Promise.all(top.map((p) => createPromptCard(p)))
       .then((cards) =>
@@ -923,9 +923,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
   });
 
   $("#navBookmarkBtn")?.addEventListener("click", () => {
-    document
-      .getElementById("mostBookmarked")
-      .scrollIntoView({ behavior: "smooth", block: "start" });
+    window.location.href = "profile.html#bookmarksContainer";
   });
 
   /* ---------------------------------------------------------
