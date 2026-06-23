@@ -17,6 +17,10 @@ import {
   query,
   where,
 } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+import {
+  incrementBookmarkCount,
+  decrementBookmarkCount,
+} from "./firestore-service.js";
 
 /**
  * Friendly error messages mapping Firebase error codes
@@ -376,6 +380,9 @@ export async function addBookmark(promptId, promptData) {
       bookmarkedAt: serverTimestamp(),
     });
 
+    // Increment global bookmark count for the prompt
+    await incrementBookmarkCount(promptId);
+
     console.log("📌 Prompt bookmarked:", promptId);
   } catch (error) {
     console.error("Error adding bookmark:", error);
@@ -403,6 +410,10 @@ export async function removeBookmark(promptId) {
     const bookmarkRef = doc(db, "users", user.uid, "bookmarks", promptId);
 
     await deleteDoc(bookmarkRef);
+
+    // Decrement global bookmark count for the prompt
+    await decrementBookmarkCount(promptId);
+
     console.log("❌ Bookmark removed:", promptId);
   } catch (error) {
     console.error("Error removing bookmark:", error);

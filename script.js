@@ -10,6 +10,7 @@ import {
   getPromptMetrics,
   listenToPromptMetrics,
   listenToUserLikeStatus,
+  initializeBookmarksField,
 } from "./firestore-service.js";
 
 import {
@@ -290,8 +291,8 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
           </button>
         </div>
         
-        <button class="card-action-center" aria-label="View prompt details" type="button">
-          <i class="fa-solid fa-arrow-up-right"></i>
+        <button class="card-action-center card-view-btn" aria-label="View full image" type="button">
+          <i class="fa-solid fa-eye"></i>
         </button>
         
         <div class="card-category-badge">${(catNameById[p.category] || p.category).toUpperCase()}</div>
@@ -347,6 +348,14 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
 
       await toggleBookmark(p.id, promptData);
       saveBtn.classList.toggle("saved", state.bookmarks.has(p.id));
+    });
+
+    // View button - record view and open modal
+    const viewBtn = card.querySelector(".card-view-btn");
+    viewBtn.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      await recordPromptView(p.id);
+      openModal(p.id);
     });
 
     // Like button
@@ -410,9 +419,16 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
   function updateModalMetrics(metrics) {
     const viewsEl = document.getElementById("modalViews");
     const likesEl = document.getElementById("modalLikes");
+    const bookmarkCountEl = document.getElementById("modalBookmarkCount");
 
-    if (viewsEl) viewsEl.textContent = metrics.views;
-    if (likesEl) likesEl.textContent = metrics.likes;
+    // Ensure all values are non-negative
+    const views = Math.max(0, metrics.views || 0);
+    const likes = Math.max(0, metrics.likes || 0);
+    const bookmarks = Math.max(0, metrics.bookmarks || 0);
+
+    if (viewsEl) viewsEl.textContent = views;
+    if (likesEl) likesEl.textContent = likes;
+    if (bookmarkCountEl) bookmarkCountEl.textContent = bookmarks;
   }
 
   /**
@@ -641,6 +657,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
           `fa-${saved ? "solid" : "regular"} fa-bookmark`;
       });
       if (currentModalId === id) syncModalBookmarkButton(id);
+      updateBookmarkCount();
     } catch (error) {
       console.error("Error toggling bookmark:", error);
       showToast("Error updating bookmark", "fa-solid fa-exclamation-circle");
@@ -661,22 +678,22 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
     // Record view in Firestore
     recordPromptView(id);
 
-    // Fetch and display metrics
-    getPromptMetrics(id).then((metrics) => {
-      updateModalMetrics(metrics);
-    });
-
+    // Display prompt content
     $("#modalImage").src = p.img;
     $("#modalImage").alt = p.title;
     $("#modalCategoryChip").textContent = catNameById[p.category];
     $("#modalTitle").textContent = p.title;
-    $("#modalBookmarkCount").textContent = p.bookmarks;
     $("#modalDate").textContent = formatDate(p.date);
     $("#modalPromptText").textContent = p.prompt;
 
     const encoded = encodeURIComponent(p.prompt);
     $("#modalChatGPTBtn").href = `https://chat.openai.com/?q=${encoded}`;
     $("#modalGeminiBtn").href = `https://gemini.google.com/app?q=${encoded}`;
+
+    // Fetch and display metrics from Firestore (views, likes, bookmarks)
+    getPromptMetrics(id).then((metrics) => {
+      updateModalMetrics(metrics);
+    });
 
     syncModalBookmarkButton(id);
 
@@ -783,6 +800,126 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
     toast.classList.add("show");
     setTimeout(() => toast.classList.remove("show"), 1800);
   });
+
+  // Modal share button handler
+  const shareMenu = $("#shareMenu");
+  const shareBtn = $("#modalShareBtn");
+
+  shareBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    shareMenu.style.display =
+      shareMenu.style.display === "none" ? "block" : "none";
+  });
+
+  // Close share menu when clicking outside
+  document.addEventListener("click", (e) => {
+    if (
+      !e.target.closest("#modalShareBtn") &&
+      !e.target.closest("#shareMenu")
+    ) {
+      shareMenu.style.display = "none";
+    }
+  });
+
+  // Social media share handlers
+  const shareOptions = $$(".share-option");
+  shareOptions.forEach((option) => {
+    option.addEventListener("click", (e) => {
+      e.preventDefault();
+      const p = PROMPTS.find((x) => x.id === currentModalId);
+      if (!p) return;
+
+      const platform = option.dataset.platform;
+      const imageUrl = encodeURIComponent(p.img);
+      const shareText = encodeURIComponent(p.title);
+      const websiteUrl = encodeURIComponent(window.location.origin);
+
+      // Try native app first, fallback to web
+      let appUrl = "";
+      let webUrl = "";
+
+      switch (platform) {
+        case "whatsapp":
+          // App URI: whatsapp://send?text=...
+          // Web fallback: https://wa.me/
+          appUrl = `whatsapp://send?text=${shareText}%20${imageUrl}%20Check%20this%20on%20${websiteUrl}`;
+          webUrl = `https://wa.me/?text=${shareText}%20${imageUrl}%20Check%20this%20on%20${websiteUrl}`;
+          break;
+        case "telegram":
+          // App URI: tg://msg?text=...
+          // Web fallback: https://t.me/share/
+          appUrl = `tg://msg?text=${shareText}%20${imageUrl}%20Check%20this%20on%20${websiteUrl}`;
+          webUrl = `https://t.me/share/url?url=${imageUrl}&text=${shareText}`;
+          break;
+        case "facebook":
+          // App URI: fb://page/ (doesn't support direct share, use web)
+          // Web fallback: https://www.facebook.com/sharer/
+          webUrl = `https://www.facebook.com/sharer/sharer.php?u=${imageUrl}`;
+          appUrl = webUrl; // Use web as fallback for Facebook
+          break;
+        case "twitter":
+          // App URI: twitter://post?text=...
+          // Web fallback: https://twitter.com/intent/tweet
+          appUrl = `twitter://post?text=${shareText}%20${imageUrl}`;
+          webUrl = `https://twitter.com/intent/tweet?text=${shareText}&url=${imageUrl}`;
+          break;
+        case "instagram":
+          // Instagram app doesn't support deep linking for sharing
+          // Show toast and open app store link
+          showToast(
+            "Copy image and paste in Instagram app",
+            "fa-solid fa-info-circle",
+          );
+
+          // Try to open Instagram app, fallback to web
+          const instaAppUrl = `instagram://user?username=instagram`;
+          const instaWebUrl = "https://www.instagram.com";
+
+          // Try app first with timeout fallback
+          openAppWithFallback(instaAppUrl, instaWebUrl, "Instagram");
+          shareMenu.style.display = "none";
+          return;
+      }
+
+      // Open app with web fallback
+      if (appUrl && webUrl) {
+        openAppWithFallback(appUrl, webUrl, platform);
+      } else if (webUrl) {
+        window.open(webUrl, "_blank", "width=600,height=600");
+      }
+
+      showToast(`Sharing on ${platform}...`, "fa-solid fa-share-nodes");
+      shareMenu.style.display = "none";
+    });
+  });
+
+  /**
+   * Try to open native app, fallback to web if app not installed
+   * Uses timeout to detect if app failed to open
+   */
+  function openAppWithFallback(appUrl, webUrl, platform) {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isAndroid = /Android/.test(navigator.userAgent);
+
+    // For mobile, try app URI first
+    if (isIOS || isAndroid) {
+      const startTime = Date.now();
+
+      // Try opening app
+      window.location.href = appUrl;
+
+      // If app doesn't open in 1.5 seconds, fallback to web
+      setTimeout(() => {
+        if (Date.now() - startTime < 2000) {
+          window.open(webUrl, "_blank", "width=600,height=600");
+          console.log(`${platform} app not found, opening web version`);
+        }
+      }, 1500);
+    } else {
+      // Desktop - just use web URL
+      window.open(webUrl, "_blank", "width=600,height=600");
+    }
+  }
 
   /* ---------------------------------------------------------
      7. GLOBAL TOAST
@@ -1014,7 +1151,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
             img: data.image || "",
             prompt: data.prompt,
             tags: Array.isArray(data.tags) ? data.tags : [], // Include tags from Firebase
-            bookmarks: data.bookmarks || 0,
+            bookmarks: typeof data.bookmarks === "number" ? data.bookmarks : 0,
             views: data.views || 0,
             likes: data.likes || 0,
             date: data.dateAdded
@@ -1049,6 +1186,10 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
   async function init() {
     // Load prompts from Firestore first - critical for data sync
     await loadPromptsFromFirestore();
+
+    // Initialize bookmarks field for all existing prompts (migration)
+    // Ensures all prompts have bookmarks: 0 field initialized
+    await initializeBookmarksField();
 
     // Build search index after loading prompts
     // Enables fast Firebase-powered search with title, category, and tags
