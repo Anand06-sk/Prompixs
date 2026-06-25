@@ -81,6 +81,7 @@ body {
   background: var(--bg);
   color: var(--text);
   overflow-x: hidden;
+  padding-bottom: 74px;
   transition:
     background var(--transition),
     color var(--transition);
@@ -321,6 +322,76 @@ body.dark .blob {
   transition:
     background var(--transition),
     border-color var(--transition);
+}
+.home-tabs {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 305;
+  width: 100%;
+  background: var(--nav-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border-color);
+  transition:
+    background var(--transition),
+    border-color var(--transition);
+}
+.home-tabs-inner {
+  max-width: 1360px;
+  margin: 0 auto;
+  display: flex;
+  padding: 8px 16px;
+  gap: 8px;
+}
+.tab-btn {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 10px 6px;
+  color: var(--text);
+  background: transparent;
+  border-radius: 8px;
+  border: none;
+  font-weight: 700;
+  font-size: 0.8rem;
+  transition: background 220ms ease, transform 180ms ease, box-shadow 220ms ease, color 220ms ease;
+}
+.tab-btn img { width: 24px; height: 24px; display: block; }
+.tab-btn:hover { transform: translateY(-2px); }
+.tab-btn.active {
+  color: var(--purple-deep);
+  background: linear-gradient(90deg, rgba(167,139,250,0.08), rgba(249,168,212,0.04));
+}
+
+/* Section show/hide with fade/slide */
+#trending,
+#mostLiked,
+#mostViewed,
+#mostBookmarked {
+  opacity: 0;
+  transform: translateY(8px);
+  max-height: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transition: opacity 300ms ease, transform 300ms ease, max-height 300ms ease;
+}
+.tab-visible {
+  opacity: 1 !important;
+  transform: none !important;
+  max-height: 4000px !important;
+  pointer-events: auto !important;
+}
+
+@media (max-width: 640px) {
+  .home-tabs-inner { padding: 6px 8px; }
+  .tab-btn { padding: 8px 4px; font-size: 0.75rem; }
+  .tab-btn img { width: 20px; height: 20px; }
+  body { padding-bottom: 68px; }
 }
 .navbar-inner {
   max-width: 1360px;
@@ -809,80 +880,65 @@ body.dark .blob {
 /* =========================================================
    CATEGORIES
    ========================================================= */
-.categories-section {
-  padding: 50px 0 70px;
-}
 .categories-scroll {
   max-width: 1360px;
   margin: 0 auto;
-  padding: 0 32px;
+  padding: 0 24px 6px;
   display: flex;
-  gap: 16px;
+  gap: 12px;
   overflow-x: auto;
   scroll-snap-type: x proximate;
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 .categories-scroll::-webkit-scrollbar {
   display: none;
 }
 
-.category-card {
+.category-chip {
   scroll-snap-align: start;
   flex-shrink: 0;
-  width: 150px;
-  border-radius: var(--r-lg);
-  padding: 22px 16px;
-  text-align: center;
-  background: var(--surface);
-  border: 1px solid var(--border-color);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  transition:
-    transform var(--transition),
-    box-shadow var(--transition),
-    border-color var(--transition);
-  cursor: pointer;
-}
-.category-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 16px 30px rgba(167, 139, 250, 0.22);
-  border-color: var(--purple);
-}
-.category-card.active {
-  background: var(--grad-brand);
-  border-color: transparent;
-}
-.category-card.active .category-icon {
-  background: rgba(255, 255, 255, 0.25);
-  color: #fff;
-}
-.category-card.active span {
-  color: #fff;
-}
-
-.category-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: var(--grad-soft);
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.4rem;
-  color: var(--purple-deep);
+  gap: 10px;
+  padding: 12px 18px;
+  border-radius: var(--r-pill);
+  border: 1px solid rgba(30, 27, 46, 0.08);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.95rem;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease,
+    background 0.25s ease;
+  cursor: pointer;
 }
-.category-card span {
-  font-weight: 700;
-  font-size: 0.86rem;
+.category-chip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+}
+.category-chip.active {
+  background: rgba(167, 139, 250, 0.1);
+  border-color: rgba(167, 139, 250, 0.28);
+  color: var(--ink);
+  box-shadow: 0 18px 32px rgba(167, 139, 250, 0.12);
+}
+
+.category-filter-bar {
+  max-width: 1360px;
+  margin: 0 auto 28px;
 }
 
 /* =========================================================
    MASONRY GRID (Trending)
    ========================================================= */
 .prompts-section {
-  padding: 50px 0;
+  padding: 40px 0 60px;
 }
 .prompts-section.alt-bg {
   background: var(--surface-alt);
@@ -2045,19 +2101,6 @@ body.dark .share-option:hover {
   .categories-scroll {
     gap: 12px;
   }
-  .category-card {
-    width: 130px;
-    padding: 18px 12px;
-    gap: 10px;
-  }
-  .category-icon {
-    width: 50px;
-    height: 50px;
-    font-size: 1.2rem;
-  }
-  .category-card span {
-    font-size: 0.8rem;
-  }
   .footer-top {
     grid-template-columns: 1fr;
     gap: 20px;
@@ -2248,8 +2291,8 @@ body.dark .share-option:hover {
     padding: 0 12px;
   }
   .masonry-grid {
-    column-count: 1;
-    column-gap: 0;
+    column-count: 2;
+    column-gap: 12px;
   }
   .masonry-grid .prompt-card {
     margin: 0 0 10px;
@@ -2282,19 +2325,6 @@ body.dark .share-option:hover {
   }
   .categories-scroll {
     gap: 10px;
-  }
-  .category-card {
-    width: 110px;
-    padding: 16px 10px;
-    gap: 8px;
-  }
-  .category-icon {
-    width: 44px;
-    height: 44px;
-    font-size: 1rem;
-  }
-  .category-card span {
-    font-size: 0.75rem;
   }
   .footer-top {
     gap: 16px;
@@ -2495,8 +2525,8 @@ body.dark .share-option:hover {
     padding: 0 10px;
   }
   .masonry-grid {
-    column-count: 1;
-    column-gap: 0;
+    column-count: 2;
+    column-gap: 10px;
   }
   .masonry-grid .prompt-card {
     margin: 0 0 8px;
@@ -2529,20 +2559,6 @@ body.dark .share-option:hover {
   }
   .categories-scroll {
     gap: 8px;
-  }
-  .category-card {
-    width: 95px;
-    padding: 14px 8px;
-    gap: 6px;
-    border-radius: 14px;
-  }
-  .category-icon {
-    width: 40px;
-    height: 40px;
-    font-size: 0.9rem;
-  }
-  .category-card span {
-    font-size: 0.7rem;
   }
   .footer-top {
     gap: 14px;

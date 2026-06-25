@@ -266,6 +266,48 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
     });
   }
 
+  /* ---------------------------------------------------------
+     HOME TABS: tab bar behavior and section visibility
+  --------------------------------------------------------- */
+  function setupHomeTabs() {
+    const tabs = Array.from(document.querySelectorAll('.tab-btn'));
+    const sections = {
+      trending: document.getElementById('trending'),
+      mostLiked: document.getElementById('mostLiked'),
+      mostViewed: document.getElementById('mostViewed'),
+      mostBookmarked: document.getElementById('mostBookmarked'),
+    };
+
+    if (!sections.trending) return;
+
+    function activate(id) {
+      tabs.forEach((t) => {
+        const isActive = t.dataset.target === id;
+        t.classList.toggle('active', isActive);
+        t.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+      });
+
+      Object.keys(sections).forEach((key) => {
+        const el = sections[key];
+        if (!el) return;
+        if (key === id) el.classList.add('tab-visible');
+        else el.classList.remove('tab-visible');
+      });
+    }
+
+    tabs.forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = btn.dataset.target;
+        if (!target) return;
+        activate(target);
+      });
+    });
+
+    // Default active tab
+    activate('trending');
+  }
+
   async function createPromptCard(p) {
     // VALIDATE: Skip incomplete prompts - no fake/untitled cards
     if (
@@ -594,17 +636,14 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
   }
 
   function renderCategories() {
-    // Horizontal scroll section
+    // Category chip filter bar
     categoriesGrid.innerHTML = "";
     CATEGORIES.forEach((cat) => {
       const btn = document.createElement("button");
       btn.className =
-        "category-card" + (state.activeCategory === cat.id ? " active" : "");
+        "category-chip" + (state.activeCategory === cat.id ? " active" : "");
       btn.dataset.id = cat.id;
-      btn.innerHTML = `
-        <span class="category-icon"><i class="${cat.icon}"></i></span>
-        <span>${cat.name}</span>
-      `;
+      btn.textContent = cat.name;
       btn.addEventListener("click", () => setCategory(cat.id));
       categoriesGrid.appendChild(btn);
     });
@@ -1268,6 +1307,12 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
     renderCategories();
     renderAllCardSections();
     updateBookmarkCount();
+    // initialize home tabs after sections render
+    try {
+      setupHomeTabs();
+    } catch (err) {
+      console.warn('setupHomeTabs error', err);
+    }
   }
 
   document.addEventListener("DOMContentLoaded", init);

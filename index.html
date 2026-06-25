@@ -241,20 +241,12 @@
         </div>
       </section>
 
-      <!-- ===== CATEGORIES ===== -->
-      <section class="categories-section" id="categories">
-        <div class="section-head">
-          <h2>Browse by category</h2>
-          <p>Thirteen worlds, one prompt away.</p>
-        </div>
-        <div class="categories-scroll" id="categoriesGrid"></div>
-      </section>
-
-      <!-- ===== TRENDING (MASONRY) ===== -->
+      <!-- ===== TRENDING + CATEGORY FILTERS ===== -->
       <section class="prompts-section" id="trending">
         <div class="section-head">
           <div>
             <h2>Trending prompts</h2>
+            <p>Browse categories and discover trending AI prompts.</p>
           </div>
           <div class="active-filter" id="activeFilterBar" hidden>
             <span id="activeFilterText"></span>
@@ -262,6 +254,9 @@
               <i class="fa-solid fa-xmark"></i> Clear
             </button>
           </div>
+        </div>
+        <div class="category-filter-bar">
+          <div class="categories-scroll" id="categoriesGrid" role="tablist" aria-label="Filter prompts by category"></div>
         </div>
         <div class="masonry-grid" id="trendingGrid"></div>
         <p class="empty-state" id="emptyState" hidden>
@@ -357,7 +352,7 @@
           <a href="#trending">Trending</a>
           <a href="#mostBookmarked">Most bookmarked</a>
           <a href="#latest">Latest</a>
-          <a href="#categories">Categories</a>
+          <a href="#trending">Categories</a>
         </div>
         <div class="footer-col">
           <h4>Company</h4>
@@ -683,5 +678,27 @@
         }
       });
     </script>
+
+    <!-- ===== HOME TABS (Bottom navigation) ===== -->
+    <div class="home-tabs" id="homeTabs" aria-label="Home tabs">
+      <div class="home-tabs-inner">
+        <button class="tab-btn active" data-target="trending" type="button" aria-pressed="true">
+          <img src="https://fonts.gstatic.com/s/e/notoemoji/17.0/1f4c8/72.png" alt="trending"/>
+          <span>Trending Prompts</span>
+        </button>
+        <button class="tab-btn" data-target="mostLiked" type="button" aria-pressed="false">
+          <img src="https://fonts.gstatic.com/s/e/notoemoji/17.0/2764_fe0f/72.png" alt="liked"/>
+          <span>Most Liked</span>
+        </button>
+        <button class="tab-btn" data-target="mostViewed" type="button" aria-pressed="false">
+          <img src="https://fonts.gstatic.com/s/e/notoemoji/17.0/1f441_fe0f/72.png" alt="viewed"/>
+          <span>Most Viewed</span>
+        </button>
+        <button class="tab-btn" data-target="mostBookmarked" type="button" aria-pressed="false">
+          <img src="https://fonts.gstatic.com/s/e/notoemoji/17.0/1f516/72.png" alt="bookmarked"/>
+          <span>Most Bookmarked</span>
+        </button>
+      </div>
+    </div>
   </body>
 </html>
