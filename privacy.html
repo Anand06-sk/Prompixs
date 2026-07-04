@@ -283,12 +283,82 @@
         margin-top: 12px;
       }
 
-      footer {
+      .site-footer {
         max-width: 1180px;
-        margin: 0 auto;
-        padding: 14px 8px 0;
+        margin: 32px auto 0;
+        padding: 28px;
+        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.86);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+      }
+
+      .site-footer-grid {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr 0.8fr;
+        gap: 24px;
+        align-items: start;
+      }
+
+      .footer-brand-title {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: var(--ink);
+        margin-bottom: 10px;
+      }
+
+      .footer-brand-title em {
+        font-style: normal;
+        color: var(--accent);
+      }
+
+      .footer-brand-mark {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        display: grid;
+        place-items: center;
+        color: white;
+      }
+
+      .footer-brand p,
+      .footer-col a,
+      .footer-col p {
         color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .footer-col {
+        display: grid;
+        gap: 10px;
+      }
+
+      .footer-col h3 {
+        font-size: 1.05rem;
+        margin-bottom: 4px;
+      }
+
+      .footer-col a {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        width: fit-content;
+      }
+
+      .footer-col a:hover {
+        color: var(--ink);
+      }
+
+      .footer-bottom {
+        margin-top: 24px;
+        padding-top: 16px;
+        border-top: 1px solid var(--border);
         text-align: center;
+        color: var(--muted);
         font-size: 0.95rem;
       }
 
@@ -504,13 +574,36 @@
           <h2>Contact Information</h2>
           <p>
             If you have any questions about this Privacy Policy or how your information is handled, please contact us at
-            <a href="mailto:prompix@gmail.com" style="color: var(--purple-deep); font-weight: 700; text-decoration: underline; text-underline-offset: 3px;">prompix@gmail.com</a>.
+            <a href="mailto:contact.prompixs@gmail.com" style="color: var(--purple-deep); font-weight: 700; text-decoration: underline; text-underline-offset: 3px;">contact.prompixs@gmail.com</a>.
           </p>
         </section>
       </main>
 
-      <footer>
-         <p>© 2026 Prompixs. All rights reserved.</p>
+      <footer class="site-footer">
+        <div class="site-footer-grid">
+          <div class="footer-brand">
+            <a href="index.html" class="footer-brand-title" aria-label="Go to home page">
+              <span class="footer-brand-mark"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+              <span>Prom<em>pixs</em></span>
+            </a>
+            <p>Discover, save, and explore AI image generation prompts that inspire your next creation.</p>
+          </div>
+          <div class="footer-col">
+            <h3>Quick Links</h3>
+            <a href="index.html">Home</a>
+            <a href="about.html">About</a>
+            <a href="privacy.html">Privacy Policy</a>
+            <a href="terms.html">Terms of Use</a>
+            <a href="contact.html">Contact Us</a>
+          </div>
+          <div class="footer-col">
+            <h3>Contact</h3>
+            <a href="mailto:contact.prompixs@gmail.com"><i class="fa-solid fa-envelope"></i> contact.prompixs@gmail.com</a>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>© 2026 Prompixs. All rights reserved.</p>
+        </div>
       </footer>
     </div>
     <script>
