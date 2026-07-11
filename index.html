@@ -18,7 +18,7 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="assets/css/style.css" />
   </head>
   <body>
     <!-- ===== Animated background mesh ===== -->
@@ -41,10 +41,10 @@
         <nav class="topbar-nav" aria-label="Primary navigation">
           <a href="#top" class="active" aria-current="page">Home</a>
           <a href="#categoriesGrid">Categories</a>
-          <a href="about.html">About</a>
-          <a href="terms.html">Terms of Use</a>
-          <a href="privacy.html">Privacy Policy</a>
-          <a href="contact.html">Contact</a>
+          <a href="pages/about.html">About</a>
+          <a href="pages/terms.html">Terms of Use</a>
+          <a href="pages/privacy.html">Privacy Policy</a>
+          <a href="pages/contact.html">Contact</a>
         </nav>
 
         <div class="nav-actions">
@@ -102,7 +102,7 @@
                 </div>
               </div>
               <div class="profile-dropdown-divider"></div>
-              <a href="profile.html" class="profile-dropdown-item">
+              <a href="auth/profile.html" class="profile-dropdown-item">
                 <i class="fa-solid fa-user"></i> My Profile
               </a>
               <a href="#" class="profile-dropdown-item" id="myBookmarksLink">
@@ -192,10 +192,10 @@
       <nav class="mobile-drawer-nav" aria-label="Mobile primary navigation">
         <a href="#top" class="active" aria-current="page">Home</a>
         <a href="#categoriesGrid">Categories</a>
-        <a href="about.html">About</a>
-        <a href="terms.html">Terms of Use</a>
-        <a href="privacy.html">Privacy Policy</a>
-        <a href="contact.html">Contact</a>
+        <a href="pages/about.html">About</a>
+        <a href="pages/terms.html">Terms of Use</a>
+        <a href="pages/privacy.html">Privacy Policy</a>
+        <a href="pages/contact.html">Contact</a>
       </nav>
       <div class="mobile-drawer-section">
         <p class="mobile-drawer-label">Categories</p>
@@ -373,16 +373,16 @@
         </div>
         <div class="footer-col">
           <h4>Quick links</h4>
-          <a href="profile.html">Profile</a>
-          <a href="contact.html">Contact</a>
-          <a href="about.html">About</a>
+          <a href="auth/profile.html">Profile</a>
+          <a href="pages/contact.html">Contact</a>
+          <a href="pages/about.html">About</a>
           <button class="footer-link-btn" type="button" data-action="toggle-dark">Dark mode</button>
           <a href="profile.html#bookmarks">Bookmarks</a>
         </div>
         <div class="footer-col">
           <h4>Legal</h4>
-          <a href="privacy.html">Privacy policy</a>
-          <a href="terms.html">Terms of use</a>
+          <a href="pages/privacy.html">Privacy policy</a>
+          <a href="pages/terms.html">Terms of use</a>
         </div>
       </div>
       <div class="footer-bottom">
@@ -547,10 +547,10 @@
     </div>
 
     <script type="module">
-      import { logoutUser } from "./auth.js";
-      import { auth } from "./firebase-config.js";
+      import { logoutUser } from "./assets/js/auth.js";
+      import { auth } from "./assets/js/firebase-config.js";
       import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-      import { resendVerificationEmail } from "./auth.js";
+      import { resendVerificationEmail } from "./assets/js/auth.js";
 
       // Listen to auth state changes
       onAuthStateChanged(auth, (user) => {
@@ -686,7 +686,7 @@
         profileMenuBtn.addEventListener("click", (e) => {
           e.preventDefault();
           e.stopPropagation();
-          window.location.href = "profile.html";
+          window.location.href = "auth/profile.html";
         });
 
         // Close dropdown when clicking outside
@@ -711,7 +711,7 @@
       }
     </script>
 
-    <script type="module" src="script.js"></script>
+    <script type="module" src="assets/js/script.js"></script>
 
     <script>
       // Update prompt count dynamically based on actual data

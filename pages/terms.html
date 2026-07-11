@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>About Prompixs | Discover Better AI Prompts</title>
+    <title>Terms of Use | Prompixs</title>
     <meta
       name="description"
-      content="Prompixs is a thoughtful platform for discovering, saving, and using AI prompts with visual previews and direct access to tools like ChatGPT and Gemini."
+      content="Terms of Use for Prompixs, the AI prompt discovery platform for exploring prompts, bookmarking favorites, and creating AI-generated images."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -53,7 +53,7 @@
         margin: 0;
         font-family: "Plus Jakarta Sans", sans-serif;
         background:
-          radial-gradient(circle at top left, rgba(167, 139, 250, 0.2), transparent 28%),
+          radial-gradient(circle at top left, rgba(167, 139, 250, 0.18), transparent 28%),
           linear-gradient(135deg, #fdfcff 0%, #f7f2ff 46%, #fef7fb 100%);
         color: var(--text);
       }
@@ -216,10 +216,6 @@
         background: linear-gradient(135deg, rgba(167, 139, 250, 0.16), rgba(249, 168, 212, 0.14));
         border: 1px solid var(--border);
         box-shadow: var(--shadow);
-        display: grid;
-        grid-template-columns: 1.2fr 0.8fr;
-        gap: 24px;
-        align-items: center;
       }
 
       .eyebrow {
@@ -243,70 +239,15 @@
       }
 
       .hero h1 {
-        font-size: clamp(2.2rem, 4vw, 3.4rem);
-        margin-bottom: 16px;
+        font-size: clamp(2.2rem, 4vw, 3.2rem);
+        margin-bottom: 14px;
       }
 
       .hero p {
-        font-size: 1.05rem;
+        font-size: 1.04rem;
         color: var(--muted);
-        line-height: 1.7;
-        max-width: 680px;
-      }
-
-      .hero-actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
-        margin-top: 24px;
-      }
-
-      .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        padding: 12px 18px;
-        border-radius: 999px;
-        border: 1px solid transparent;
-        font-weight: 600;
-        transition: transform 0.2s ease, background 0.2s ease;
-      }
-
-      .btn:hover {
-        transform: translateY(-1px);
-      }
-
-      .btn-primary {
-        background: linear-gradient(135deg, var(--purple) 0%, var(--pink) 100%);
-        color: var(--ink);
-      }
-
-      .btn-secondary {
-        background: rgba(255, 255, 255, 0.72);
-        border-color: var(--border);
-        color: var(--ink);
-      }
-
-      .hero-card {
-        padding: 22px;
-        border-radius: 24px;
-        background: rgba(255, 255, 255, 0.72);
-        border: 1px solid var(--border);
-        box-shadow: var(--shadow);
-      }
-
-      .hero-card strong {
-        display: block;
-        font-size: 1.2rem;
-        margin-bottom: 10px;
-      }
-
-      .hero-card ul {
-        margin: 0;
-        padding-left: 18px;
-        color: var(--muted);
-        line-height: 1.8;
+        line-height: 1.75;
+        max-width: 760px;
       }
 
       .section {
@@ -320,7 +261,7 @@
       }
 
       .section h2 {
-        font-size: 1.7rem;
+        font-size: 1.55rem;
         margin-bottom: 12px;
       }
 
@@ -330,51 +271,16 @@
         line-height: 1.8;
       }
 
-      .section-grid {
-        display: grid;
-        gap: 16px;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+      .section ul {
+        padding-left: 18px;
       }
 
-      .mini-card {
-        padding: 18px;
-        border-radius: 18px;
-        background: rgba(255, 255, 255, 0.72);
+      .highlight {
+        background: rgba(255, 255, 255, 0.68);
         border: 1px solid rgba(30, 27, 46, 0.08);
-      }
-
-      .founders-grid {
-        display: grid;
-        gap: 16px;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        margin-top: 18px;
-      }
-
-      .founder-card {
-        padding: 20px;
-        border-radius: 20px;
-        background: rgba(255, 255, 255, 0.76);
-        border: 1px solid rgba(30, 27, 46, 0.08);
-      }
-
-      .founder-card h3 {
-        font-size: 1.25rem;
-        margin-bottom: 8px;
-      }
-
-      .cta {
-        text-align: center;
-        padding: 34px 24px;
-      }
-
-      .cta h2 {
-        margin-bottom: 10px;
-        font-size: 2rem;
-      }
-
-      .cta p {
-        max-width: 720px;
-        margin: 0 auto 20px;
+        border-radius: 16px;
+        padding: 14px 16px;
+        margin-top: 12px;
       }
 
       .site-footer {
@@ -470,22 +376,13 @@
           gap: 12px;
         }
 
-        .hero {
-          grid-template-columns: 1fr;
-          padding: 36px 20px;
+        .hero,
+        .section {
+          padding: 24px 18px;
         }
 
         .topbar-nav {
           display: none;
-        }
-
-        .mobile-menu-toggle {
-          display: inline-flex;
-        }
-
-        .section-grid,
-        .founders-grid {
-          grid-template-columns: 1fr;
         }
 
         .site-footer {
@@ -511,12 +408,19 @@
           width: 100%;
         }
       }
+
+      @media (max-width: 860px) {
+
+        .mobile-menu-toggle {
+          display: inline-flex;
+        }
+      }
     </style>
   </head>
   <body>
     <div class="page-shell">
       <header class="topbar">
-        <a href="index.html" class="brand" aria-label="Go to home page">
+        <a href="../index.html" class="brand" aria-label="Go to home page">
           <span class="brand-mark"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
           <span>Prom<em>pixs</em></span>
         </a>
@@ -524,10 +428,10 @@
           <i class="fa-solid fa-bars"></i>
         </button>
         <nav class="topbar-nav" aria-label="Primary navigation">
-          <a href="index.html">Home</a>
-          <a href="about.html" class="active" aria-current="page">About</a>
+          <a href="../index.html">Home</a>
+          <a href="about.html">About</a>
           <a href="privacy.html">Privacy Policy</a>
-          <a href="terms.html">Terms of Use</a>
+          <a href="terms.html" class="active" aria-current="page">Terms of Use</a>
           <a href="contact.html">Contact Us</a>
         </nav>
       </header>
@@ -540,10 +444,10 @@
           </button>
         </div>
         <nav class="mobile-drawer-nav" aria-label="Mobile primary navigation">
-          <a href="index.html">Home</a>
-          <a href="about.html" class="active" aria-current="page">About</a>
+          <a href="../index.html">Home</a>
+          <a href="about.html">About</a>
           <a href="privacy.html">Privacy Policy</a>
-          <a href="terms.html">Terms of Use</a>
+          <a href="terms.html" class="active" aria-current="page">Terms of Use</a>
           <a href="contact.html">Contact Us</a>
         </nav>
       </div>
@@ -551,159 +455,188 @@
 
       <main>
         <section class="hero">
-          <div>
-            <div class="eyebrow"><i class="fa-solid fa-sparkles"></i> About Prompixs</div>
-            <h1>We built a better way to discover prompts.</h1>
-            <p>
-              Prompixs helps people discover AI prompts, preview them with images, create trending AI images using their own photos,
-              and open inspiring ideas directly in tools like ChatGPT and Gemini.
-              It is built for anyone who wants to explore AI creativity in a simpler, more meaningful way.
-            </p>
-            <div class="hero-actions">
-              <a class="btn btn-primary" href="index.html"><i class="fa-solid fa-arrow-right"></i> Explore Prompixs</a>
-              <a class="btn btn-secondary" href="#founders"><i class="fa-solid fa-users"></i> Meet the founders</a>
-            </div>
-          </div>
-          <div class="hero-card">
-            <strong>What makes Prompixs different?</strong>
-            <ul>
-              <li>Discover prompts that are easy to understand and use</li>
-              <li>Preview ideas visually before trying them out</li>
-              <li>Create new images with your own photo and a strong prompt</li>
-            </ul>
+          <div class="eyebrow"><i class="fa-solid fa-file-contract"></i> Terms of Use</div>
+          <h1>These terms guide how you use Prompixs.</h1>
+          <p>
+            By using Prompixs, you agree to follow these Terms of Use. They explain how the platform is meant to be used,
+            what is expected from users, and how Prompixs operates as a creative and community-focused service.
+          </p>
+          <div class="highlight">
+            <strong>Effective Date:</strong> To be updated upon official launch<br />
+            <strong>Last Updated:</strong> To be updated upon official launch
           </div>
         </section>
 
-        <section class="section" id="who-we-are">
-          <h2>Who We Are</h2>
+        <section class="section" id="acceptance-of-terms">
+          <h2>Acceptance of Terms</h2>
           <p>
-            Prompixs is designed for creators, students, developers, designers, AI enthusiasts, and anyone curious about what AI can help them make.
-            We wanted to build a space where people could explore ideas without feeling lost in clutter or overwhelmed by too many choices.
-            The platform is meant to feel calm, useful, and encouraging from the first click.
+            By visiting, browsing, or using Prompixs, you agree to be bound by these Terms of Use.
+            If you do not agree with these terms, please do not use the platform.
           </p>
         </section>
 
-        <section class="section" id="story">
-          <h2>Our Story</h2>
+        <section class="section" id="eligibility-and-account-access">
+          <h2>Eligibility and Account Access</h2>
           <p>
-            Prompixs was created by Anand S K and Anu N while both were pursuing B.E. Computer Science and Engineering at University College of Engineering, Nagercoil.
-            The idea came from a very personal need. We were searching for useful prompts ourselves and found that many options were scattered, hard to understand, and not easy to use in a practical way.
-            We wanted to build something simpler, more organized, and more helpful for people who were trying to turn ideas into real results.
+            Prompixs allows users to create accounts using email and password or Google Sign-In.
+            You are responsible for keeping your account details secure and for all activity that happens through your account.
           </p>
         </section>
 
-        <section class="section" id="mission">
-          <h2>Our Mission</h2>
+        <section class="section" id="acceptable-use">
+          <h2>Acceptable Use</h2>
           <p>
-            Our mission is to make prompt discovery feel simple, inspiring, and practical.
-            We want to help users move from curiosity to creation without wasting time sorting through endless content.
-            Prompixs brings together high-quality prompts, visual previews, smart search, and easy sharing so that creativity feels more accessible and more enjoyable.
+            Prompixs is intended to be used for creative exploration, inspiration, and responsible discovery of AI prompts.
+            You agree to use the platform in a lawful and respectful manner and not interfere with its normal operation.
           </p>
         </section>
 
-        <section class="section" id="users">
-          <h2>What Users Can Do</h2>
-          <div class="section-grid">
-            <div class="mini-card">
-              <h3>Discover</h3>
-              <p>Explore high-quality AI prompts with visual preview images that make each idea easier to understand before you use it.</p>
-            </div>
-            <div class="mini-card">
-              <h3>Search</h3>
-              <p>Find prompts quickly by title, category, and tags, so the right inspiration is always close at hand.</p>
-            </div>
-            <div class="mini-card">
-              <h3>Save</h3>
-              <p>Bookmark favorite prompts and build a personal collection of ideas you want to return to later.</p>
-            </div>
-            <div class="mini-card">
-              <h3>Explore</h3>
-              <p>Browse trending, latest, most viewed, and most liked prompt collections to keep discovering fresh creative direction.</p>
-            </div>
-            <div class="mini-card">
-              <h3>Open</h3>
-              <p>Use prompts directly in AI tools such as ChatGPT and Gemini, making the experience smoother from inspiration to output.</p>
-            </div>
-            <div class="mini-card">
-              <h3>Create</h3>
-              <p>Turn your own photo into a striking AI image with carefully crafted prompts that help bring your idea to life.</p>
-            </div>
+        <section class="section" id="prohibited-activities">
+          <h2>Prohibited Activities</h2>
+          <p>
+            You may not use Prompixs to break any applicable law, attempt unauthorized access, reverse engineer the platform,
+            spread harmful software, impersonate another person, bypass security measures, or carry out fraud or other abusive activity.
+            You also may not use the service in a way that disrupts the experience of other users.
+          </p>
+        </section>
+
+        <section class="section" id="intellectual-property">
+          <h2>Intellectual Property</h2>
+          <p>
+            All original website content, including prompts, preview images, logos, branding, website design, text, graphics,
+            categories, and collections, is owned by Prompixs or used with appropriate permission.
+            You may browse, bookmark, and use prompts for personal purposes, but you may not copy, republish, redistribute,
+            sell, scrape, or claim Prompixs content as your own without prior written permission.
+          </p>
+        </section>
+
+        <section class="section" id="user-accounts">
+          <h2>User Accounts</h2>
+          <p>
+            Users may create accounts to personalize their experience, save bookmarks, and access platform features.
+            You are responsible for the information you provide and for keeping your account details accurate and secure.
+          </p>
+        </section>
+
+        <section class="section" id="multiple-account-policy">
+          <h2>Multiple Account Policy</h2>
+          <p>
+            You may create more than one account if needed, but multiple accounts must not be used to manipulate likes, views,
+            bookmarks, or other platform activity, or to gain unfair advantages. Prompixs reserves the right to suspend or permanently terminate accounts involved in such misuse.
+          </p>
+        </section>
+
+        <section class="section" id="scraping-and-automated-access">
+          <h2>Scraping and Automated Access</h2>
+          <p>
+            You may not use bots, crawlers, scripts, scrapers, or other automated tools to collect or download large amounts of Prompixs content without prior written permission.
+            Normal personal browsing through the website is permitted.
+          </p>
+        </section>
+
+        <section class="section" id="third-party-services">
+          <h2>Third-Party Services</h2>
+          <p>
+            Prompixs may integrate with or link to third-party services such as ChatGPT, Google Gemini, Firebase, and Cloudinary.
+            These services operate under their own terms and privacy practices. Prompixs is not responsible for the actions or policies of these third-party providers once you leave Prompixs.
+          </p>
+        </section>
+
+        <section class="section" id="disclaimer-of-warranties">
+          <h2>Disclaimer of Warranties</h2>
+          <p>
+            Prompixs provides prompts and related content for creative and informational purposes.
+            AI-generated results may vary depending on the AI platform, model, prompt usage, user inputs, and future updates.
+            Prompixs does not guarantee that every prompt will always produce the same results or the exact outcome you expect.
+            You remain responsible for how you use prompts and any AI-generated outputs.
+          </p>
+          <p>
+            AI-generated results may vary based on the AI model, prompt usage, user input, and future model updates.
+            Users are responsible for reviewing and evaluating AI-generated content before relying on it, sharing it, or presenting it as factual or definitive.
+          </p>
+        </section>
+
+        <section class="section" id="limitation-of-liability">
+          <h2>Limitation of Liability</h2>
+          <p>
+            Prompixs is not liable for temporary downtime, loss of data caused by third-party services, AI-generated outputs,
+            user decisions based on prompts, or indirect or consequential damages arising from use of the platform.
+            Our responsibility is limited to what is reasonably necessary under the circumstances.
+          </p>
+        </section>
+
+        <section class="section" id="service-availability">
+          <h2>Service Availability</h2>
+          <p>
+            Prompixs strives to provide a reliable service, but we do not guarantee uninterrupted or error-free availability.
+            The platform may occasionally be unavailable due to maintenance, updates, security improvements, technical issues, or other circumstances beyond our control.
+          </p>
+        </section>
+
+        <section class="section" id="feature-changes">
+          <h2>Feature Changes</h2>
+          <p>
+            Prompixs may add, remove, improve, modify, suspend, or discontinue features or services at any time, with or without prior notice.
+          </p>
+        </section>
+
+        <section class="section" id="account-suspension-and-termination">
+          <h2>Account Suspension and Termination</h2>
+          <p>
+            Prompixs reserves the right to suspend or permanently terminate any account that violates these Terms.
+            This may include misuse, fraud, illegal activity, unauthorized access, security threats, content theft, or repeated violations.
+          </p>
+        </section>
+
+        <section class="section" id="changes-to-these-terms">
+          <h2>Changes to These Terms</h2>
+          <p>
+            Prompixs may revise these Terms of Use from time to time as the platform evolves.
+            When significant changes are made, users may be notified through the website.
+          </p>
+          <div class="highlight">
+            <strong>Effective Date:</strong> To be updated upon official launch<br />
+            <strong>Last Updated:</strong> To be updated upon official launch
           </div>
         </section>
 
-        <section class="section" id="why-choose">
-          <h2>Why Choose Prompixs</h2>
+        <section class="section" id="governing-law">
+          <h2>Governing Law</h2>
           <p>
-            Prompixs stands out because it brings together organized prompt collections, visual previews, fast search, easy bookmarking,
-            direct access to AI platforms, and inspiration for trending AI image creation. Everything is shaped around one goal: making it easier for people to find the right idea and use it without unnecessary effort.
+            These Terms of Use shall be governed by and interpreted in accordance with the laws of India.
+            Any dispute arising out of or related to these Terms of Use shall be subject to the applicable courts in India.
           </p>
         </section>
 
-        <section class="section" id="values">
-          <h2>Our Values</h2>
+        <section class="section" id="entire-agreement">
+          <h2>Entire Agreement</h2>
           <p>
-            We believe creativity should feel open and inviting. That is why simplicity, quality, and continuous improvement are at the center of everything we build.
-            We also care deeply about user privacy and about creating a space where people can explore ideas without pressure or confusion.
+            These Terms of Use, together with the Privacy Policy, constitute the complete and exclusive agreement between you and Prompixs regarding your use of the platform.
+            They supersede any prior understandings, discussions, or representations relating to the same subject matter.
           </p>
         </section>
 
-        <section class="section" id="vision">
-          <h2>Our Vision</h2>
+        <section class="section" id="severability">
+          <h2>Severability</h2>
           <p>
-            We imagine a future where discovering great AI prompts feels as natural as finding the right idea at the right time.
-            Prompixs aims to become a trusted space where creators, learners, and curious minds can explore, experiment, and grow with confidence.
+            If any provision of these Terms of Use is found to be invalid, unenforceable, or unlawful, the remaining provisions shall continue in full force and effect.
+            The invalid provision shall be interpreted to the extent necessary to make it enforceable without affecting the overall intent of these Terms.
           </p>
         </section>
 
-        <section class="section" id="founders">
-          <h2>Meet the Founders</h2>
+        <section class="section" id="contact-information">
+          <h2>Contact Information</h2>
           <p>
-            Prompixs was built by Anand S K and Anu N, two young builders who are currently pursuing B.E. Computer Science and Engineering at University College of Engineering, Nagercoil.
-            Their work reflects a strong mix of technical thinking and user-centered design.
+            If you have any questions about these Terms of Use, please contact us at
+            <a href="mailto:contact.prompixs@gmail.com" style="color: var(--purple-deep); font-weight: 700; text-decoration: underline; text-underline-offset: 3px;">contact.prompixs@gmail.com</a>.
           </p>
-          <div class="founders-grid">
-            <article class="founder-card">
-              <h3>Anand S K</h3>
-              <p>
-                Anand brings a practical and thoughtful approach to building tools that feel useful from the first interaction.
-                He is driven by the idea that software should simplify rather than overwhelm.
-              </p>
-            </article>
-            <article class="founder-card">
-              <h3>Anu N</h3>
-              <p>
-                Anu focuses on creating experiences that feel clear, warm, and approachable.
-                Her perspective helps shape Prompixs into a platform that values both function and feeling.
-              </p>
-            </article>
-          </div>
-        </section>
-
-        <section class="section" id="roadmap">
-          <h2>Future Roadmap</h2>
-          <p>
-            We are still building, and there is a lot more we want to add. In the future, we plan to support more AI platforms, improve prompt discovery with better filtering and recommendations,
-            introduce more personalized experiences, add community-driven features, and expand our prompt library with even more creative collections.
-            Our aim is to make Prompixs a place that grows with the people using it.
-          </p>
-        </section>
-
-        <section class="section cta">
-          <h2>Explore Prompixs today</h2>
-          <p>
-            If you are looking for a cleaner way to discover, save, and use AI prompts, Prompixs is here for you.
-            Start exploring and see how much easier creative inspiration can feel.
-          </p>
-          <div class="hero-actions" style="justify-content:center;">
-            <a class="btn btn-primary" href="index.html"><i class="fa-solid fa-house"></i> Go to Home</a>
-          </div>
         </section>
       </main>
 
       <footer class="site-footer">
         <div class="site-footer-grid">
           <div class="footer-brand">
-            <a href="index.html" class="footer-brand-title" aria-label="Go to home page">
+            <a href="../index.html" class="footer-brand-title" aria-label="Go to home page">
               <span class="footer-brand-mark"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
               <span>Prom<em>pixs</em></span>
             </a>
@@ -711,7 +644,7 @@
           </div>
           <div class="footer-col">
             <h3>Quick Links</h3>
-            <a href="index.html">Home</a>
+            <a href="../index.html">Home</a>
             <a href="about.html">About</a>
             <a href="privacy.html">Privacy Policy</a>
             <a href="terms.html">Terms of Use</a>

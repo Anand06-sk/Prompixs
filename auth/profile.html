@@ -14,7 +14,7 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="../assets/css/style.css" />
     <style>
       .profile-wrapper {
         max-width: 1360px;
@@ -959,7 +959,7 @@
     <!-- Navbar -->
     <header class="navbar" id="navbar">
       <div class="navbar-inner">
-        <a href="index.html" class="logo">
+        <a href="../index.html" class="logo">
           <span class="logo-mark">
             <i class="fa-solid fa-wand-magic-sparkles"></i>
           </span>
@@ -977,7 +977,7 @@
           <button class="btn btn-outline" id="logoutBtn">
             <i class="fa-solid fa-sign-out-alt"></i> Logout
           </button>
-          <a href="index.html" class="btn btn-primary">
+          <a href="../index.html" class="btn btn-primary">
             <i class="fa-solid fa-arrow-left"></i> Back
           </a>
         </div>
@@ -1279,7 +1279,7 @@
             <div id="emptyBookmarks" class="empty-bookmarks" hidden>
               <i class="fa-solid fa-bookmark"></i>
               <p>You haven't saved any prompts yet</p>
-              <a href="index.html">Start exploring →</a>
+              <a href="../index.html">Start exploring →</a>
             </div>
           </div>
         </section>
@@ -1697,9 +1697,9 @@
     </div>
 
     <script type="module">
-      import { logoutUser, resendVerificationEmail } from "./auth.js";
-      import { getUserBookmarks, getBookmarkCount } from "./user-service.js";
-      import { auth } from "./firebase-config.js";
+      import { logoutUser, resendVerificationEmail } from "../assets/js/auth.js";
+      import { getUserBookmarks, getBookmarkCount } from "../assets/js/user-service.js";
+      import { auth } from "../assets/js/firebase-config.js";
       import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
       // Global current user variable
@@ -2514,11 +2514,11 @@
           // logoutUser already handles the redirect via onAuthStateChanged listener
           // But we'll add explicit redirect as fallback
           setTimeout(() => {
-            window.location.href = "index.html";
+            window.location.href = "../index.html";
           }, 500);
         } catch (error) {
           console.error("Logout failed:", error);
-          window.location.href = "index.html";
+          window.location.href = "../index.html";
         }
       };
 
@@ -2807,7 +2807,7 @@
           
           // Logout and redirect
           await logoutUser();
-          window.location.href = "index.html";
+          window.location.href = "../index.html";
         } catch (error) {
           console.error("Error deleting account:", error);
           const errorDiv = document.getElementById("deleteConfirmError");

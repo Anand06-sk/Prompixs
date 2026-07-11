@@ -1269,7 +1269,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
     profileMenuBtn.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
-      window.location.href = "profile.html";
+      window.location.href = "../auth/profile.html";
     });
   }
 
@@ -1297,13 +1297,13 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
      13. LOGIN BUTTON + Bookmark nav button
   --------------------------------------------------------- */
   $("#loginBtn").addEventListener("click", () => {
-    if (isLoggedIn()) return (window.location.href = "profile.html");
+    if (isLoggedIn()) return (window.location.href = "../auth/profile.html");
     redirectToAuth(
       window.location.pathname + window.location.search + window.location.hash,
     );
   });
   $("#mobileLoginBtn").addEventListener("click", () => {
-    if (isLoggedIn()) return (window.location.href = "profile.html");
+    if (isLoggedIn()) return (window.location.href = "../auth/profile.html");
     redirectToAuth(
       window.location.pathname + window.location.search + window.location.hash,
     );
