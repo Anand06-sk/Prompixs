@@ -131,6 +131,7 @@
         line-height: 1.5;
         overflow: hidden;
         text-overflow: ellipsis;
+        line-clamp: 2;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
@@ -353,6 +354,7 @@
         font-weight: 600;
         color: var(--text);
         margin-bottom: 8px;
+        line-clamp: 2;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
@@ -567,7 +569,6 @@
         .bookmark-image {
           height: 130px;
         }
-      }
 
       /* ===== PROFILE MODAL STYLES ===== */
       .modal-overlay {
@@ -1193,12 +1194,10 @@
 
         <!-- Profile Info Section -->
         <div id="profileInfoSection" style="max-width: 800px; margin: 0 auto 40px; background: var(--glass-bg); border: 1px solid var(--glass-border); backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur)); box-shadow: var(--glass-shadow); border-radius: 20px; padding: 28px 24px; display: none;">
-          <!-- Header with Edit Button -->
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
-            <h3 style="margin: 0; font-family: var(--font-display); font-size: 1.3rem; font-weight: 600; color: var(--text);">Edit Profile Details</h3>
+            <h3 style="margin: 0; font-family: var(--font-display); font-size: 1.3rem; font-weight: 600; color: var(--text);">About You</h3>
           </div>
 
-          <!-- Display View -->
           <div id="profileViewMode" style="display: block;">
             <div style="margin-bottom: 20px;">
               <div style="font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-soft); margin-bottom: 8px;">Bio</div>
@@ -1216,7 +1215,6 @@
             </div>
           </div>
 
-          <!-- Edit View -->
           <form id="profileInlineEditForm" style="display: none;">
             <div style="margin-bottom: 16px;">
               <label style="display: block; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-soft); margin-bottom: 8px;">Date of Birth</label>
@@ -1970,7 +1968,7 @@
         }
 
         // Load current values
-        const { db } = await import("./firebase-config.js");
+        const { db } = await import("../assets/js/firebase-config.js");
         const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js");
         
         try {
@@ -2009,13 +2007,13 @@
         }
 
         if (section) {
-          // Keep the section visible when profile is incomplete,
-          // otherwise hide it if the banner already shows complete details.
-          const isComplete =
-            document.getElementById("bannerBio")?.textContent !== "—" &&
-            document.getElementById("bannerDOB")?.textContent !== "—" &&
-            document.getElementById("bannerGender")?.textContent !== "—";
-          section.style.display = isComplete ? "none" : "block";
+          const hasProfileData = [
+            document.getElementById("bannerBio")?.textContent || "",
+            document.getElementById("bannerDOB")?.textContent || "",
+            document.getElementById("bannerGender")?.textContent || ""
+          ].some((value) => value && value.trim() && value !== "—");
+
+          section.style.display = hasProfileData ? "block" : "none";
         }
       }
 
@@ -2036,7 +2034,7 @@
         }
         
         try {
-          const { db } = await import("./firebase-config.js");
+          const { db } = await import("../assets/js/firebase-config.js");
           const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js");
           
           if (!currentUser) return;
@@ -2128,7 +2126,7 @@
 
         // Set banner background image
         const banner = document.getElementById("profileBanner");
-        banner.style.backgroundImage = "url('./profile.jpeg')";
+        banner.style.backgroundImage = "url('../profile.jpeg')";
 
         // Set avatar from photoURL if available, otherwise show initials
         if (user.photoURL) {
@@ -2538,7 +2536,7 @@
             return;
           }
           
-          const { db } = await import("./firebase-config.js");
+          const { db } = await import("../assets/js/firebase-config.js");
           const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js");
           
           const userDocRef = doc(db, "users", currentUser.uid);
@@ -2629,7 +2627,7 @@
         e.preventDefault();
         
         try {
-          const { db } = await import("./firebase-config.js");
+          const { db } = await import("../assets/js/firebase-config.js");
           const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js");
           
           if (!currentUser) return;
@@ -2778,7 +2776,7 @@
           errorDiv.style.display = "none";
           
           // Import required Firebase functions
-          const { db } = await import("./firebase-config.js");
+          const { db } = await import("../assets/js/firebase-config.js");
           const { doc, deleteDoc } = await import("https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js");
           const { deleteUser } = await import("https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js");
           
@@ -2849,7 +2847,7 @@
       // Load and display profile info
       async function loadProfileInfo() {
         try {
-          const { db } = await import("./firebase-config.js");
+          const { db } = await import("../assets/js/firebase-config.js");
           const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js");
           
           if (!currentUser) {
@@ -2901,10 +2899,10 @@
             }
           }
           
-          // Hide About You section once profile is complete
-          const hasCompleteBannerData = userData.dateOfBirth && userData.gender && userData.bio;
+          // Hide the details section once the profile is complete because the banner already shows it.
+          const isProfileComplete = Boolean(userData.bio && userData.dateOfBirth && userData.gender);
           if (section) {
-            section.style.display = hasCompleteBannerData ? "none" : "block";
+            section.style.display = isProfileComplete ? "none" : "block";
           }
         } catch (error) {
           console.error("Error loading profile info:", error);
@@ -2916,9 +2914,11 @@
         const bannerBio = document.getElementById("bannerBio")?.textContent || "";
         const bannerDob = document.getElementById("bannerDOB")?.textContent || "";
         const bannerGender = document.getElementById("bannerGender")?.textContent || "";
-        const isComplete = bannerBio !== "—" && bannerDob !== "—" && bannerGender !== "—";
+        const isProfileComplete = [bannerBio, bannerDob, bannerGender].every(
+          (value) => value && value.trim() && value !== "—"
+        );
         if (section) {
-          section.style.display = isComplete ? "none" : "block";
+          section.style.display = isProfileComplete ? "none" : "block";
         }
       }
       

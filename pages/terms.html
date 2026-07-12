@@ -415,6 +415,65 @@
           display: inline-flex;
         }
       }
+      body.dark {
+        color-scheme: dark;
+        --bg: #120f1d;
+        --surface: rgba(24, 20, 39, 0.92);
+        --surface-strong: rgba(32, 26, 52, 0.96);
+        --text: #f7f2ff;
+        --muted: #bdb4d6;
+        --ink: #f7f2ff;
+        --ink-soft: #bdb4d6;
+        --mist: #161321;
+        --border: rgba(255, 255, 255, 0.12);
+        --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+      }
+
+      body.dark {
+        background:
+          radial-gradient(circle at top left, rgba(167, 139, 250, 0.18), transparent 28%),
+          linear-gradient(135deg, #0f0b1a 0%, #171325 46%, #0d0a17 100%);
+        color: var(--text);
+      }
+
+      body.dark .topbar,
+      body.dark .hero,
+      body.dark .mobile-drawer,
+      body.dark .page-shell,
+      body.dark .section,
+      body.dark .highlight,
+      body.dark .site-footer {
+        background: rgba(20, 17, 32, 0.92);
+        border-color: var(--border);
+        color: var(--text);
+        box-shadow: var(--shadow);
+      }
+
+      body.dark .topbar-nav a,
+      body.dark .mobile-drawer a {
+        color: var(--muted);
+      }
+
+      body.dark .mobile-menu-toggle,
+      body.dark .eyebrow {
+        background: rgba(24, 20, 39, 0.96);
+        color: var(--text);
+        border-color: var(--border);
+      }
+
+      body.dark .topbar-nav a:hover,
+      body.dark .topbar-nav a.active,
+      body.dark .mobile-drawer a.active {
+        color: var(--text);
+      }
+
+      body.dark input,
+      body.dark textarea,
+      body.dark select {
+        background: rgba(10, 10, 18, 0.95);
+        color: var(--text);
+        border-color: var(--border);
+      }
     </style>
   </head>
   <body>
@@ -681,6 +740,13 @@
       mobileMenuToggle.addEventListener("click", openDrawer);
       closeMobileDrawer.addEventListener("click", closeDrawer);
       drawerOverlay.addEventListener("click", closeDrawer);
+    </script>
+    <script>
+      (function () {
+        const savedDark = localStorage.getItem("pv_dark") === "1";
+        document.body.classList.toggle("dark", savedDark);
+        document.documentElement.style.colorScheme = savedDark ? "dark" : "light";
+      })();
     </script>
   </body>
 </html>

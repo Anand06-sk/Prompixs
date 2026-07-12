@@ -130,6 +130,47 @@
         }
       }
 
+      body.dark {
+        color-scheme: dark;
+        --white: #ffffff;
+        --purple: #8b5cf6;
+        --light-purple: #a78bfa;
+        --pink: #ec4899;
+        --ink: #f7f2ff;
+        --ink-soft: #bdb4d6;
+        --mist: #161321;
+        --line: rgba(255, 255, 255, 0.12);
+        --glass-bg: rgba(20, 17, 32, 0.86);
+        --glass-border: rgba(255, 255, 255, 0.12);
+        --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      }
+
+      body.dark {
+        background:
+          radial-gradient(circle at top left, rgba(167, 139, 250, 0.18), transparent 28%),
+          linear-gradient(135deg, #0f0b1a 0%, #171325 46%, #0d0a17 100%);
+        color: var(--ink);
+      }
+
+      body.dark .site-header,
+      body.dark .card,
+      body.dark .panel,
+      body.dark .container {
+        background: rgba(20, 17, 32, 0.92);
+        border-color: var(--line);
+        color: var(--ink);
+      }
+
+      body.dark .site-nav a,
+      body.dark .brand {
+        color: var(--ink);
+      }
+
+      body.dark .site-nav a:hover,
+      body.dark .site-nav a:focus-visible {
+        color: var(--light-purple);
+      }
+
       .container {
         width: min(1160px, calc(100% - 2rem));
         margin: 0 auto;
@@ -849,6 +890,13 @@
           });
         }
       });
+    </script>
+    <script>
+      (function () {
+        const savedDark = localStorage.getItem("pv_dark") === "1";
+        document.body.classList.toggle("dark", savedDark);
+        document.documentElement.style.colorScheme = savedDark ? "dark" : "light";
+      })();
     </script>
   </body>
 </html>
