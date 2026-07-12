@@ -234,7 +234,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
   }
 
   function redirectToAuth(next = "/", action = "", id = "") {
-    const url = new URL(window.location.origin + "/auth.html");
+    const url = new URL("auth/auth.html", window.location.href);
     if (next) url.searchParams.set("next", next);
     if (action) url.searchParams.set("action", action);
     if (id) url.searchParams.set("id", id);

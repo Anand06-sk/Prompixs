@@ -117,9 +117,9 @@
               </button>
             </div>
           </div>
-          <button class="btn btn-primary login-btn" id="loginBtn">
+          <a class="btn btn-primary login-btn" id="loginBtn" href="auth/auth.html?next=index.html">
             <i class="fa-solid fa-user"></i> Log in
-          </button>
+          </a>
         </div>
 
         <button
@@ -205,9 +205,9 @@
         <button class="btn btn-ghost" id="mobileDarkToggle">
           <i class="fa-solid fa-moon"></i> Dark mode
         </button>
-        <button class="btn btn-primary" id="mobileLoginBtn">
+        <a class="btn btn-primary" id="mobileLoginBtn" href="auth/auth.html?next=index.html">
           <i class="fa-solid fa-user"></i> Log in
-        </button>
+        </a>
       </div>
     </div>
     <div class="drawer-overlay" id="drawerOverlay"></div>
@@ -612,7 +612,7 @@
 
       // Login button handlers
       document.getElementById("loginBtn").addEventListener("click", () => {
-        window.location.href = "auth.html?next=index.html";
+        window.location.href = "auth/auth.html?next=index.html";
       });
 
       document
@@ -630,7 +630,7 @@
       document
         .getElementById("mobileLoginBtn")
         .addEventListener("click", () => {
-          window.location.href = "auth.html?next=index.html";
+          window.location.href = "auth/auth.html?next=index.html";
         });
 
       // Logout button handler
