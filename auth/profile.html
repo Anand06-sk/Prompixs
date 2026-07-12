@@ -324,6 +324,7 @@
       }
 
       .bookmark-image {
+        position: relative;
         width: 100%;
         height: 160px;
         background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
@@ -339,6 +340,36 @@
 
       .bookmark-card:hover .bookmark-image img {
         transform: scale(1.05);
+      }
+
+      .bookmark-metrics {
+        position: absolute;
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+        z-index: 2;
+      }
+
+      .bookmark-metric {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        padding: 6px 8px;
+        border-radius: 999px;
+        background: rgba(15, 15, 23, 0.72);
+        color: #fff;
+        font-size: 0.68rem;
+        font-weight: 700;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+      }
+
+      .bookmark-metric i {
+        font-size: 0.7rem;
       }
 
       .bookmark-info {
@@ -538,9 +569,7 @@
           width: 40px;
           height: 40px;
         }
-      }
-
-        .profile-stats {
+          .profile-stats {
           grid-template-columns: 1fr;
           gap: 16px;
         }
@@ -569,6 +598,34 @@
         .bookmark-image {
           height: 130px;
         }
+
+        .bookmark-metrics {
+          left: 8px;
+          right: 8px;
+          bottom: 8px;
+          gap: 4px;
+        }
+
+        .bookmark-metric {
+          padding: 5px 6px;
+          font-size: 0.62rem;
+        }
+
+        .modal-close {
+          display: none;
+        }
+
+        .modal-image-close {
+          display: flex !important;
+          top: 12px;
+          right: 12px;
+          z-index: 12;
+        }
+
+        .modal-image-close i {
+          color: #fff !important;
+        }
+      }
 
       /* ===== PROFILE MODAL STYLES ===== */
       .modal-overlay {
@@ -619,6 +676,14 @@
         font-size: 1.2rem;
         transition: all 0.3s ease;
         z-index: 10;
+      }
+
+      .modal-image-close {
+        display: none;
+        background: rgba(15, 15, 23, 0.9);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        color: #fff;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
       }
 
       .modal-close:hover {
@@ -1586,6 +1651,9 @@
         </button>
         <div class="modal-grid">
           <div class="modal-image-wrap">
+            <button class="modal-close modal-image-close" id="profileModalImageClose" aria-label="Close">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
             <img id="profileModalImage" src="" alt="" />
             <span class="modal-category-chip" id="profileModalCategoryChip"></span>
           </div>
@@ -2181,29 +2249,48 @@
         const container = document.getElementById("bookmarksContainer");
         container.innerHTML = "";
 
-        bookmarks.forEach((bookmark) => {
-          const card = document.createElement("div");
-          card.className = "bookmark-card";
-          card.style.cursor = "pointer";
-          card.innerHTML = `
-            <div class="bookmark-image">
-              <img src="${bookmark.image || "https://via.placeholder.com/200x160"}" alt="${bookmark.title || "Prompt"}" />
-            </div>
-            <div class="bookmark-info">
-              <div class="bookmark-title">${bookmark.title || "Untitled Prompt"}</div>
-              <div class="bookmark-category">${bookmark.category || "General"}</div>
-            </div>
-          `;
-          
-          // Make card clickable to open modal in profile
-          card.addEventListener("click", () => {
-            openProfileModal(bookmark);
-          });
-          
-          container.appendChild(card);
-        });
+        Promise.all(
+          bookmarks.map(async (bookmark) => {
+            const card = document.createElement("div");
+            card.className = "bookmark-card";
+            card.style.cursor = "pointer";
 
-        container.hidden = false;
+            const promptId = bookmark.promptId || bookmark.id;
+            let metrics = { views: 0, likes: 0, bookmarks: 0 };
+
+            if (promptId) {
+              try {
+                const { getPromptMetrics } = await import("../assets/js/firestore-service.js");
+                metrics = await getPromptMetrics(promptId);
+              } catch (error) {
+                console.error("Error loading bookmark metrics:", error);
+              }
+            }
+
+            card.innerHTML = `
+              <div class="bookmark-image">
+                <img src="${bookmark.image || "https://via.placeholder.com/200x160"}" alt="${bookmark.title || "Prompt"}" />
+                <div class="bookmark-metrics" aria-label="Prompt metrics">
+                  <span class="bookmark-metric"><i class="fa-solid fa-eye"></i> ${metrics.views || 0}</span>
+                  <span class="bookmark-metric"><i class="fa-solid fa-heart"></i> ${metrics.likes || 0}</span>
+                  <span class="bookmark-metric"><i class="fa-solid fa-bookmark"></i> ${metrics.bookmarks || 0}</span>
+                </div>
+              </div>
+              <div class="bookmark-info">
+                <div class="bookmark-title">${bookmark.title || "Untitled Prompt"}</div>
+                <div class="bookmark-category">${bookmark.category || "General"}</div>
+              </div>
+            `;
+
+            card.addEventListener("click", () => {
+              openProfileModal(bookmark);
+            });
+
+            container.appendChild(card);
+          }),
+        ).finally(() => {
+          container.hidden = false;
+        });
       }
       
       // Open modal for bookmark in profile.html
@@ -2225,7 +2312,7 @@
         // Fetch metrics from Firestore
         (async () => {
           try {
-            const { getPromptMetrics } = await import("./firestore-service.js");
+            const { getPromptMetrics } = await import("../assets/js/firestore-service.js");
             const metrics = await getPromptMetrics(bookmark.promptId);
             
             // Update metrics display
@@ -2272,6 +2359,7 @@
       
       // Modal close button
       document.getElementById("profileModalClose")?.addEventListener("click", closeProfileModal);
+      document.getElementById("profileModalImageClose")?.addEventListener("click", closeProfileModal);
       
       // Close modal on overlay click
       document.getElementById("profileModalOverlay")?.addEventListener("click", (e) => {
