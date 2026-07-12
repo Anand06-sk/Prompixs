@@ -1892,6 +1892,10 @@ body.dark .auth-popup-card {
   transition: transform 0.2s ease, background 0.2s ease;
   touch-action: manipulation;
 }
+.auth-popup-close i {
+  display: block;
+  line-height: 1;
+}
 body.dark .auth-popup-close {
   background: rgba(27, 20, 50, 0.95);
   color: #fff;
@@ -1925,8 +1929,13 @@ body.dark .auth-popup-close {
     margin-top: 16px;
   }
   .auth-popup-close {
-    top: 14px;
-    right: 14px;
+    top: 12px;
+    right: 12px;
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    min-height: 42px;
+    font-size: 1.05rem;
   }
 }
 
