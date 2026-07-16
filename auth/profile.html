@@ -501,6 +501,18 @@
           padding: 20px 16px 30px;
         }
 
+        .back-nav-btn {
+          width: 40px;
+          height: 40px;
+          padding: 0;
+          border-radius: 12px;
+          gap: 0;
+        }
+
+        .back-nav-label {
+          display: none;
+        }
+
         .profile-banner {
           min-height: 420px;
           height: auto;
@@ -617,8 +629,11 @@
 
         .modal-image-close {
           display: flex !important;
-          top: 12px;
-          right: 12px;
+          top: 10px;
+          right: 10px;
+          width: 32px;
+          height: 32px;
+          font-size: 0.95rem;
           z-index: 12;
         }
 
@@ -1043,8 +1058,8 @@
           <button class="btn btn-outline" id="logoutBtn">
             <i class="fa-solid fa-sign-out-alt"></i> Logout
           </button>
-          <a href="../index.html" class="btn btn-primary">
-            <i class="fa-solid fa-arrow-left"></i> Back
+          <a href="../index.html" class="btn btn-primary back-nav-btn">
+            <i class="fa-solid fa-arrow-left"></i> <span class="back-nav-label">Back</span>
           </a>
         </div>
       </div>
