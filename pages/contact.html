@@ -57,6 +57,7 @@
           radial-gradient(circle at top left, rgba(167, 139, 250, 0.18), transparent 28%),
           linear-gradient(135deg, #fdfcff 0%, #f7f2ff 46%, #fef7fb 100%);
         color: var(--text);
+        overflow-x: hidden;
       }
 
       a {
@@ -96,6 +97,10 @@
         letter-spacing: 0.02em;
         margin-right: auto;
         flex-shrink: 0;
+      }
+
+      .brand span:last-child {
+        min-width: 0;
       }
 
       .brand-mark {
@@ -581,6 +586,17 @@
           gap: 12px;
         }
 
+        .brand {
+          min-width: 0;
+        }
+
+        .brand span:last-child {
+          max-width: 120px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
         .hero,
         .section {
           padding: 24px 18px;
@@ -621,6 +637,10 @@
       }
 
       @media (max-width: 560px) {
+        .page-shell {
+          overflow-x: clip;
+        }
+
         .hero {
           padding: 24px 18px;
         }
