@@ -1167,7 +1167,7 @@
               <a class="form-link" href="#">Forgot password?</a>
             </div>
 
-            <button type="submit" class="auth-btn auth-btn-primary">
+            <button type="submit" id="loginSubmitBtn" class="auth-btn auth-btn-primary">
               Sign In
             </button>
 
@@ -1253,7 +1253,7 @@
               <div class="form-error" id="signupTermsError"></div>
             </div>
 
-            <button type="submit" class="auth-btn auth-btn-primary">
+            <button type="submit" id="signupSubmitBtn" class="auth-btn auth-btn-primary">
               Create Account
             </button>
 
@@ -1538,26 +1538,25 @@
           console.log("📋 Setting up form handlers");
           const loginForm = document.getElementById("loginForm");
           const signupForm = document.getElementById("signupForm");
-          
+          const loginSubmitBtn = document.getElementById("loginSubmitBtn");
+          const signupSubmitBtn = document.getElementById("signupSubmitBtn");
+
           if (!loginForm) {
             console.error("❌ Login form not found!");
           } else {
-            loginForm.addEventListener("submit", (e) => {
-              console.log("🔴 Login form submit event fired");
-              this.handleLogin(e);
-            });
+            loginForm.addEventListener("submit", this.handleLogin.bind(this));
             console.log("✅ Login form handler attached");
           }
-          
+
           if (!signupForm) {
             console.error("❌ Signup form not found!");
           } else {
-            signupForm.addEventListener("submit", (e) => {
-              console.log("🔴 Signup form submit event fired");
-              this.handleSignup(e);
-            });
+            signupForm.addEventListener("submit", this.handleSignup.bind(this));
             console.log("✅ Signup form handler attached");
           }
+
+          // The submit buttons already trigger the form's submit event naturally.
+          // No extra click handler is needed and duplicate submissions can occur.
         }
 
         validateEmail(email) {
@@ -2122,45 +2121,6 @@
       // ATTACH FORM HANDLERS (after AuthManager exists)
       // ============================================
       
-      const loginForm = document.getElementById("loginForm");
-      const signupForm = document.getElementById("signupForm");
-      
-      if (loginForm && signupForm) {
-        console.log("📋 Attaching form handlers in module scope");
-        
-        // Login form submission
-        loginForm.addEventListener("submit", function(e) {
-          console.log("🔴 LOGIN FORM SUBMIT EVENT FIRED");
-          e.preventDefault();
-          e.stopPropagation();
-          
-          console.log("✅ Calling authManager.handleLogin()");
-          authManager.handleLogin(e).catch(err => {
-            console.error("❌ handleLogin error:", err);
-          });
-          return false;
-        }, true);
-        console.log("✅ Login form handler attached (module scope)");
-        
-        // Signup form submission  
-        signupForm.addEventListener("submit", function(e) {
-          console.log("🟢 SIGNUP FORM SUBMIT EVENT FIRED");
-          e.preventDefault();
-          e.stopPropagation();
-          
-          console.log("✅ Calling authManager.handleSignup()");
-          authManager.handleSignup(e).catch(err => {
-            console.error("❌ handleSignup error:", err);
-          });
-          return false;
-        }, true);
-        console.log("✅ Signup form handler attached (module scope)");
-      } else {
-        console.error("❌ Could not find form elements in module scope!");
-        console.log("loginForm:", loginForm ? "found" : "NOT FOUND");
-        console.log("signupForm:", signupForm ? "found" : "NOT FOUND");
-      }
-
       // Debug logging
       console.log("✅ Module script complete - all initialized");
       console.log("AuthManager initialized");
