@@ -1713,7 +1713,7 @@
           // Firebase authentication is handled in auth.js
           // Redirect to next page or home
           const params = new URLSearchParams(window.location.search);
-          const next = params.get("next") || "/index.html";
+          const rawNext = params.get("next");
           const action = params.get("action");
           const id = params.get("id");
 
@@ -1725,7 +1725,12 @@
             localStorage.setItem("pv_bookmarks", JSON.stringify(current));
           }
 
-          window.location.href = next;
+          const siteRoot = window.location.href.replace(/\/auth\/.*$/, "/");
+          const nextPath = rawNext ? rawNext.replace(/^\/+/, "") : "index.html";
+          const resolvedNext = new URL(nextPath, siteRoot).href;
+
+          console.log("➡️ Redirecting to:", resolvedNext, "(rawNext=", rawNext, ")");
+          window.location.href = resolvedNext;
         }
 
         async showVerificationPending(firebaseUser, email) {
