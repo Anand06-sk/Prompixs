@@ -199,6 +199,8 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
     activeCategory: null,
     searchTerm: "",
     bookmarks: new Set(), // Will be populated from Firebase
+    trendingPage: 1,
+    trendingPerPage: 15,
   };
 
   // Load user's bookmarks from Firebase
@@ -533,33 +535,114 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
     });
   }
 
+  function createSeededRandom(seed) {
+    let hash = 0;
+    const normalizedSeed = String(seed || "default");
+
+    for (let i = 0; i < normalizedSeed.length; i += 1) {
+      hash = (hash * 31 + normalizedSeed.charCodeAt(i)) >>> 0;
+    }
+
+    return () => {
+      hash = (hash * 1664525 + 1013904223) >>> 0;
+      return hash / 4294967296;
+    };
+  }
+
+  function shufflePromptsForTrending(prompts) {
+    const shuffled = [...prompts];
+    const seed = `${state.activeCategory || "all"}::${(state.searchTerm || "").trim().toLowerCase()}`;
+    const random = createSeededRandom(seed);
+
+    for (let i = shuffled.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+
+    return shuffled;
+  }
+
+  function renderTrendingPagination(totalPages, currentPage, totalPrompts) {
+    const wrap = document.getElementById("trendingPagination");
+    if (!wrap) return;
+
+    if (!totalPrompts || totalPages <= 1) {
+      wrap.innerHTML = "";
+      return;
+    }
+
+    const buttons = [];
+    for (let i = 1; i <= totalPages; i += 1) {
+      buttons.push(
+        `<button class="page-btn${i === currentPage ? " active" : ""}" data-page="${i}" type="button">${i}</button>`,
+      );
+    }
+
+    wrap.innerHTML = `
+      <button class="page-btn" data-page="prev" type="button" ${currentPage <= 1 ? "disabled" : ""}>‹</button>
+      ${buttons.join("")}
+      <button class="page-btn" data-page="next" type="button" ${currentPage >= totalPages ? "disabled" : ""}>›</button>
+      <span class="page-info">Page ${currentPage} of ${totalPages}</span>
+    `;
+
+    wrap.querySelectorAll(".page-btn[data-page]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const pageValue = btn.getAttribute("data-page");
+        let nextPage = currentPage;
+
+        if (pageValue === "prev") {
+          nextPage = currentPage - 1;
+        } else if (pageValue === "next") {
+          nextPage = currentPage + 1;
+        } else {
+          nextPage = Number(pageValue);
+        }
+
+        if (Number.isFinite(nextPage) && nextPage >= 1 && nextPage <= totalPages) {
+          state.trendingPage = nextPage;
+          renderTrending();
+          const trendingSection = document.getElementById("trending");
+          if (trendingSection) {
+            trendingSection.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        }
+      });
+    });
+  }
+
   function renderTrending() {
-    // Filter by active category and search term, then sort by engagement
     const filtered = getFilteredPrompts();
-    const trending = [...filtered]
-      .sort((a, b) => {
-        const scoreA = (a.views || 0) + (a.likes || 0) + (a.bookmarks || 0);
-        const scoreB = (b.views || 0) + (b.likes || 0) + (b.bookmarks || 0);
-        return scoreB - scoreA;
-      })
-      .slice(0, 10);
+    const totalPrompts = filtered.length;
+    const totalPages = Math.max(1, Math.ceil(totalPrompts / state.trendingPerPage));
+
+    if (!Number.isFinite(state.trendingPage) || state.trendingPage < 1) {
+      state.trendingPage = 1;
+    }
+
+    if (state.trendingPage > totalPages) {
+      state.trendingPage = totalPages;
+    }
+
+    const shuffled = shufflePromptsForTrending(filtered);
+    const start = (state.trendingPage - 1) * state.trendingPerPage;
+    const pagePrompts = shuffled.slice(start, start + state.trendingPerPage);
 
     trendingGrid.innerHTML = "";
-    if (trending.length === 0) {
+    if (totalPrompts === 0) {
       emptyState.hidden = false;
+      renderTrendingPagination(0, 1, 0);
     } else {
       emptyState.hidden = true;
-      // Create cards asynchronously
-      Promise.all(trending.map((p) => createPromptCard(p)))
+      Promise.all(pagePrompts.map((p) => createPromptCard(p)))
         .then((cards) =>
           cards
-            .filter((card) => card !== null) // Skip incomplete prompts that returned null
+            .filter((card) => card !== null)
             .forEach((card) => trendingGrid.appendChild(card)),
         )
         .catch((err) => console.error("Error rendering trending cards:", err));
+      renderTrendingPagination(totalPages, state.trendingPage, totalPrompts);
     }
 
-    // Display filter info
     if (state.activeCategory || state.searchTerm) {
       activeFilterBar.hidden = false;
       const parts = [];
@@ -620,12 +703,25 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
       .catch((err) => console.error("Error rendering viewed cards:", err));
   }
 
+  function getPromptUploadDate(prompt) {
+    const rawDate = prompt?.dateAdded || prompt?.createdAt || prompt?.date;
+
+    if (!rawDate) return 0;
+
+    if (typeof rawDate === "object" && typeof rawDate.toDate === "function") {
+      return rawDate.toDate().getTime();
+    }
+
+    const parsedDate = new Date(rawDate);
+    return Number.isNaN(parsedDate.getTime()) ? 0 : parsedDate.getTime();
+  }
+
   function renderLatestRow() {
-    // Filter by active category and search term, then sort by date
+    // Filter by active category and search term, then show the newest uploads first
     const filtered = getFilteredPrompts();
     const latest = [...filtered]
-      .sort((a, b) => new Date(b.date) - new Date(a.date))
-      .slice(0, 10);
+      .sort((a, b) => getPromptUploadDate(b) - getPromptUploadDate(a))
+      .slice(0, 15);
     latestRow.innerHTML = "";
     Promise.all(latest.map((p) => createPromptCard(p)))
       .then((cards) =>
@@ -693,6 +789,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
 
   function setCategory(id) {
     state.activeCategory = state.activeCategory === id ? null : id;
+    state.trendingPage = 1;
     renderCategories();
     renderAllCardSections();
     document
@@ -703,6 +800,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
   function clearCategoryFilter() {
     if (!state.activeCategory) return;
     state.activeCategory = null;
+    state.trendingPage = 1;
     renderCategories();
     renderAllCardSections();
   }
@@ -1116,6 +1214,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
   --------------------------------------------------------- */
   function setSearch(value) {
     state.searchTerm = value;
+    state.trendingPage = 1;
     $("#heroSearchInput").value = value;
     renderAllCardSections();
     if (value)
@@ -1141,6 +1240,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
   $("#clearFilterBtn").addEventListener("click", () => {
     state.activeCategory = null;
     state.searchTerm = "";
+    state.trendingPage = 1;
     $("#heroSearchInput").value = "";
     renderCategories();
     renderAllCardSections();
@@ -1368,6 +1468,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
             bookmarks: typeof data.bookmarks === "number" ? data.bookmarks : 0,
             views: data.views || 0,
             likes: data.likes || 0,
+            dateAdded: data.dateAdded || data.createdAt || null,
             date: data.dateAdded
               ? new Date(data.dateAdded).toISOString().split("T")[0]
               : new Date().toISOString().split("T")[0],

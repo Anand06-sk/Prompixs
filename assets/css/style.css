@@ -1334,6 +1334,47 @@ body.dark .card-title {
   color: var(--text-soft);
 }
 
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 8px auto 0;
+  max-width: 1360px;
+  padding: 0 32px;
+}
+
+.pagination .page-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--surface);
+  color: var(--text-soft);
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+.pagination .page-btn:hover,
+.pagination .page-btn.active {
+  background: var(--grad-brand);
+  color: #fff;
+  border-color: transparent;
+}
+
+.pagination .page-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.pagination .page-info {
+  margin-left: 8px;
+  font-size: 0.75rem;
+  color: var(--text-soft);
+}
+
 .empty-state {
   text-align: center;
   padding: 60px 20px;
