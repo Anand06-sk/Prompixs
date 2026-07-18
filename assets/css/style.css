@@ -1609,8 +1609,8 @@ body.dark .card-title {
   border: 1px solid var(--border-color);
   border-radius: var(--r-md);
   padding: 18px;
-  margin-bottom: 20px;
-  max-height: 160px;
+  margin-bottom: 16px;
+  max-height: 280px;
   overflow-y: auto;
 }
 .modal-prompt-box p {
@@ -1621,14 +1621,14 @@ body.dark .card-title {
 .modal-actions {
   display: flex;
   gap: 8px;
-  margin-bottom: 26px;
+  margin-bottom: 18px;
   flex-wrap: wrap;
 }
 .modal-actions .btn {
-  flex: 1 1 110px;
-  min-width: 100px;
+  flex: 1 1 96px;
+  min-width: 86px;
   justify-content: center;
-  padding: 10px 10px;
+  padding: 9px 10px;
   font-size: 0.8rem;
   white-space: nowrap;
 }
@@ -1700,10 +1700,10 @@ body.dark .share-option:hover {
   flex-wrap: wrap;
 }
 .modal-ai-actions .btn {
-  flex: 1 1 140px;
-  min-width: 120px;
+  flex: 1 1 110px;
+  min-width: 100px;
   justify-content: center;
-  padding: 10px 10px;
+  padding: 8px 10px;
   font-size: 0.8rem;
   white-space: nowrap;
 }
