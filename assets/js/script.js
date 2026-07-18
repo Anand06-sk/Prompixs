@@ -47,48 +47,121 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
   /* ---------------------------------------------------------
      1. DATA: Categories
   --------------------------------------------------------- */
-  const CATEGORIES = [
-    { id: "couples", name: "Couples", icon: "fa-solid fa-heart" },
-    { id: "friends", name: "Friends", icon: "fa-solid fa-people-group" },
-    { id: "chibi", name: "AI Chibi", icon: "fa-solid fa-face-smile-beam" },
-    { id: "cartoon", name: "Cartoon", icon: "fa-solid fa-palette" },
-    {
-      id: "caricature",
-      name: "AI Caricature",
-      icon: "fa-solid fa-masks-theater",
-    },
-    { id: "movie-poster", name: "Fake Movie Poster", icon: "fa-solid fa-film" },
-    {
-      id: "action-figure",
-      name: "AI Action Figure",
-      icon: "fa-solid fa-robot",
-    },
-    { id: "scrapbook", name: "Scrapbook", icon: "fa-solid fa-images" },
-    { id: "journal", name: "Journal Style", icon: "fa-solid fa-book-open" },
-    { id: "barbie", name: "Barbie Version", icon: "fa-solid fa-gem" },
-    { id: "90s", name: "90s Photos", icon: "fa-solid fa-camera-retro" },
-    { id: "anime", name: "Anime", icon: "fa-solid fa-dragon" },
-    { id: "fantasy", name: "Fantasy", icon: "fa-solid fa-hat-wizard" },
+  const DEFAULT_CATEGORY_NAMES = [
+    "Couples",
+    "Friends",
+    "AI Chibi",
+    "Cartoon",
+    "AI Caricature",
+    "Fake Movie Poster",
+    "AI Action Figure",
+    "Scrapbook",
+    "Journal Style",
+    "Barbie Version",
+    "90s Photos",
+    "Anime",
+    "Fantasy",
   ];
 
-  const catNameById = Object.fromEntries(CATEGORIES.map((c) => [c.id, c.name]));
-  
-  // Create mapping from category display names to IDs for Firebase data conversion
-  const catIdByName = Object.fromEntries(CATEGORIES.map((c) => [c.name, c.id]));
+  let CATEGORIES = [];
+  let catNameById = {};
+  let catIdByName = {};
+
+  function buildCategoryList(categoryNames) {
+    return categoryNames.map((name) => ({
+      id: (name || "")
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "") || "uncategorized",
+      name,
+      icon: getCategoryIcon(name),
+    }));
+  }
+
+  function getCategoryIcon(name) {
+    const iconMap = {
+      Couples: "fa-solid fa-heart",
+      Friends: "fa-solid fa-people-group",
+      "AI Chibi": "fa-solid fa-face-smile-beam",
+      Cartoon: "fa-solid fa-palette",
+      "AI Caricature": "fa-solid fa-masks-theater",
+      "Fake Movie Poster": "fa-solid fa-film",
+      "AI Action Figure": "fa-solid fa-robot",
+      Scrapbook: "fa-solid fa-images",
+      "Journal Style": "fa-solid fa-book-open",
+      "Barbie Version": "fa-solid fa-gem",
+      "90s Photos": "fa-solid fa-camera-retro",
+      Anime: "fa-solid fa-dragon",
+      Fantasy: "fa-solid fa-hat-wizard",
+    };
+
+    return iconMap[name] || "fa-solid fa-tag";
+  }
+
+  function rebuildCategoryMappings() {
+    catNameById = Object.fromEntries(CATEGORIES.map((c) => [c.id, c.name]));
+    catIdByName = Object.fromEntries(CATEGORIES.map((c) => [c.name, c.id]));
+  }
+
+  async function loadCategoriesFromFirestore() {
+    try {
+      const { collection, getDocs, doc, setDoc, serverTimestamp } =
+        await import(
+          "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js",
+        );
+      const { db } = await import("./firebase-config.js");
+
+      const categoriesCollection = collection(db, "categories");
+      const snapshot = await getDocs(categoriesCollection);
+
+      let categoryNames = [];
+
+      if (snapshot.empty) {
+        categoryNames = DEFAULT_CATEGORY_NAMES;
+        for (const name of categoryNames) {
+          const categoryRef = doc(db, "categories", name);
+          await setDoc(categoryRef, { name, createdAt: serverTimestamp() });
+        }
+      } else {
+        snapshot.forEach((item) => {
+          const name = item.data().name || item.id;
+          if (name) categoryNames.push(name);
+        });
+
+        if (!categoryNames.length) {
+          categoryNames = DEFAULT_CATEGORY_NAMES;
+        }
+      }
+
+      CATEGORIES = buildCategoryList(categoryNames);
+      rebuildCategoryMappings();
+      return CATEGORIES;
+    } catch (error) {
+      console.warn(
+        "[Public Site] Could not load categories from Firestore:",
+        error.message,
+      );
+      CATEGORIES = buildCategoryList(DEFAULT_CATEGORY_NAMES);
+      rebuildCategoryMappings();
+      return CATEGORIES;
+    }
+  }
 
   /**
-   * Convert Firebase category name (display name like "AI Caricature") 
+   * Convert Firebase category name (display name like "AI Caricature")
    * to category ID (like "caricature")
    */
   function getCategoryId(firestoreCategoryName) {
     if (!firestoreCategoryName) return "uncategorized";
-    // First try direct lookup in mapping
     if (catIdByName[firestoreCategoryName]) {
       return catIdByName[firestoreCategoryName];
     }
-    // Fallback: try lowercase matching
+
     const lowerName = firestoreCategoryName.toLowerCase();
-    const matchedCat = CATEGORIES.find(c => c.name.toLowerCase() === lowerName);
+    const matchedCat = CATEGORIES.find(
+      (c) => c.name.toLowerCase() === lowerName,
+    );
     return matchedCat ? matchedCat.id : "uncategorized";
   }
 
@@ -1398,7 +1471,10 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
   }
 
   async function init() {
-    // Load prompts from Firestore first - critical for data sync
+    // Load categories from Firestore first so the homepage filters match admin settings
+    await loadCategoriesFromFirestore();
+
+    // Load prompts from Firestore next - critical for data sync
     await loadPromptsFromFirestore();
 
     // Initialize bookmarks field for all existing prompts (migration)
