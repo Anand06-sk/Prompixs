@@ -1622,12 +1622,11 @@ body.dark .card-title {
   display: flex;
   gap: 8px;
   margin-bottom: 26px;
-  flex-wrap: nowrap;
-  overflow-x: auto;
+  flex-wrap: wrap;
 }
 .modal-actions .btn {
-  flex: 0 0 calc(25% - 6px);
-  min-width: 72px;
+  flex: 1 1 110px;
+  min-width: 100px;
   justify-content: center;
   padding: 10px 10px;
   font-size: 0.8rem;
@@ -1698,12 +1697,11 @@ body.dark .share-option:hover {
   display: flex;
   gap: 8px;
   margin-bottom: 8px;
-  flex-wrap: nowrap;
-  overflow-x: auto;
+  flex-wrap: wrap;
 }
 .modal-ai-actions .btn {
-  flex: 0 0 calc(50% - 4px);
-  min-width: 110px;
+  flex: 1 1 140px;
+  min-width: 120px;
   justify-content: center;
   padding: 10px 10px;
   font-size: 0.8rem;

@@ -802,25 +802,29 @@
       }
 
       .modal-actions {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        display: flex;
+        flex-wrap: wrap;
         gap: 10px;
         margin-bottom: 26px;
       }
 
       .modal-actions .btn {
-        width: 100%;
+        flex: 1 1 120px;
+        min-width: 110px;
+        width: auto;
       }
 
       .modal-ai-actions {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        display: flex;
+        flex-wrap: wrap;
         gap: 10px;
         margin-bottom: 8px;
       }
 
       .modal-ai-actions .btn {
-        width: 100%;
+        flex: 1 1 140px;
+        min-width: 120px;
+        width: auto;
       }
 
       .btn {
@@ -2402,47 +2406,47 @@
       // Remove bookmark button
       document.getElementById("profileModalBookmarkBtn")?.addEventListener("click", async () => {
         const modal = document.getElementById("profilePromptModal");
-        const bookmarkData = JSON.parse(modal.dataset.currentBookmark || "{}");
         const btn = document.getElementById("profileModalBookmarkBtn");
-        
-        // Use promptId from bookmark
+        let bookmarkData = {};
+
+        try {
+          bookmarkData = JSON.parse(modal?.dataset.currentBookmark || "{}");
+        } catch (error) {
+          console.warn("Could not parse current bookmark data", error);
+        }
+
         const promptId = bookmarkData.promptId || bookmarkData.id;
-        
-        if (promptId) {
-          try {
-            btn.disabled = true;
-            btn.textContent = "Removing...";
-            
-            const { removeBookmark } = await import("./user-service.js");
-            await removeBookmark(promptId);
-            
-            // Close modal
-            closeProfileModal();
-            
-            // Reload bookmarks display
-            const { getUserBookmarks } = await import("./user-service.js");
-            const userBookmarks = await getUserBookmarks();
-            
-            // Update count
-            document.getElementById("totalBookmarks").textContent = userBookmarks.length;
-            
-            // Redisplay bookmarks
-            displayUserBookmarks(userBookmarks);
-            
-            // Show success message
-            btn.textContent = "Removed!";
-            setTimeout(() => {
-              btn.disabled = false;
-              btn.textContent = '<i class="fa-solid fa-bookmark"></i> Remove';
-              btn.innerHTML = '<i class="fa-solid fa-bookmark"></i> Remove';
-            }, 1500);
-          } catch (error) {
-            console.error("Error removing bookmark:", error);
+
+        if (!promptId) {
+          alert("This bookmark is missing its prompt reference.");
+          return;
+        }
+
+        try {
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Removing...';
+
+          const { removeBookmark } = await import("../assets/js/user-service.js");
+          await removeBookmark(promptId);
+
+          closeProfileModal();
+
+          const { getUserBookmarks } = await import("../assets/js/user-service.js");
+          const userBookmarks = await getUserBookmarks();
+
+          document.getElementById("totalBookmarks").textContent = userBookmarks.length;
+          displayUserBookmarks(userBookmarks);
+
+          btn.innerHTML = '<i class="fa-solid fa-check"></i> Removed';
+          setTimeout(() => {
             btn.disabled = false;
-            btn.textContent = '<i class="fa-solid fa-bookmark"></i> Remove';
             btn.innerHTML = '<i class="fa-solid fa-bookmark"></i> Remove';
-            alert("Error removing bookmark: " + error.message);
-          }
+          }, 1200);
+        } catch (error) {
+          console.error("Error removing bookmark:", error);
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-bookmark"></i> Remove';
+          alert("Error removing bookmark: " + (error?.message || "Please try again."));
         }
       });
       
