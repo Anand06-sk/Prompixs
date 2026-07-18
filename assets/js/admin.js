@@ -1510,11 +1510,20 @@ function setupTagInput() {
   input.addEventListener("keydown", (e) => {
     if (e.key === "Enter" || e.key === ",") {
       e.preventDefault();
-      const tag = input.value.replace(/,/g, "").trim();
-      if (tag && !adminState.tags.includes(tag)) {
-        adminState.tags.push(tag);
+      const tags = input.value
+        .split(",")
+        .map((part) => part.trim())
+        .filter(Boolean);
+
+      if (tags.length) {
+        tags.forEach((tag) => {
+          if (tag && !adminState.tags.includes(tag)) {
+            adminState.tags.push(tag);
+          }
+        });
         renderTags(display);
       }
+
       input.value = "";
       updatePreview();
     }
