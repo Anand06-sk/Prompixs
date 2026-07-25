@@ -86,6 +86,17 @@ export async function recordPromptView(promptId) {
       return { success: false, error: "prompt-not-found" };
     }
 
+    const data = promptSnap.data();
+    // Validate schema: views/likes/bookmarks should be numbers
+    if (
+      typeof data.views !== "number" ||
+      typeof data.likes !== "number" ||
+      typeof data.bookmarks !== "number"
+    ) {
+      console.warn(`Prompt ${promptId} has invalid schema; skipping view increment.`);
+      return { success: false, error: "invalid-prompt-schema" };
+    }
+
     // Use atomic increment
     await updateDoc(promptRef, {
       views: increment(1),
@@ -150,9 +161,9 @@ export async function getPromptMetrics(promptId) {
         bookmarks: bookmarks,
       };
     } else {
-      // Create document if it doesn't exist
-      await createPromptDocument(promptId);
-      return { views: 0, likes: 0, bookmarks: 0 };
+      // Do not create documents from client-side (admin-only). Return zeros so UI can handle missing prompt.
+      console.warn(`Prompt ${promptId} not found when fetching metrics.`);
+      return { views: 0, likes: 0, bookmarks: 0, error: "prompt-not-found" };
     }
   } catch (error) {
     console.error("Error getting prompt metrics:", error);
@@ -215,6 +226,12 @@ export async function togglePromptLike(promptId) {
     if (alreadyLiked) {
       // Unlike: Remove like document and decrement count
       await deleteDoc(likeRef);
+      // Ensure prompt exists and has numeric likes
+      const promptSnap = await getDoc(promptRef);
+      if (!promptSnap.exists() || typeof promptSnap.data().likes !== "number") {
+        console.warn(`Prompt ${promptId} missing or invalid; cannot decrement likes from client.`);
+        return { success: false, error: "invalid-prompt-schema" };
+      }
       await updateDoc(promptRef, {
         likes: increment(-1),
         updatedAt: serverTimestamp(),
@@ -237,9 +254,9 @@ export async function togglePromptLike(promptId) {
 
       // Ensure prompt exists first (do not create prompt docs from client-side)
       const promptSnap = await getDoc(promptRef);
-      if (!promptSnap.exists()) {
-        console.warn(`Prompt ${promptId} does not exist; cannot increment likes from client.`);
-        return { success: false, error: "prompt-not-found" };
+      if (!promptSnap.exists() || typeof promptSnap.data().likes !== "number") {
+        console.warn(`Prompt ${promptId} missing or invalid; cannot increment likes from client.`);
+        return { success: false, error: "invalid-prompt-schema" };
       }
 
       await updateDoc(promptRef, {
@@ -309,9 +326,10 @@ export async function incrementBookmarkCount(promptId) {
       return { success: false, error: "prompt-not-found" };
     }
 
-    // Ensure bookmarks field exists
-    if (promptSnap.data().bookmarks === undefined) {
-      await updateDoc(promptRef, { bookmarks: 0 });
+    // Require existing numeric bookmarks field; client cannot create missing fields
+    if (typeof promptSnap.data().bookmarks !== "number") {
+      console.warn(`Prompt ${promptId} has invalid/missing bookmarks field; cannot increment from client.`);
+      return { success: false, error: "invalid-prompt-schema" };
     }
 
     // Now safely increment
@@ -339,6 +357,11 @@ export async function decrementBookmarkCount(promptId) {
     if (!promptSnap.exists()) {
       console.warn(`Prompt ${promptId} does not exist; cannot decrement bookmarks from client.`);
       return { success: false, error: "prompt-not-found" };
+    }
+
+    if (typeof promptSnap.data().bookmarks !== "number") {
+      console.warn(`Prompt ${promptId} has invalid/missing bookmarks field; cannot decrement from client.`);
+      return { success: false, error: "invalid-prompt-schema" };
     }
 
     const currentBookmarks = promptSnap.data().bookmarks || 0;
