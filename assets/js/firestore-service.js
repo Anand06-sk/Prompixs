@@ -568,6 +568,51 @@ export async function initializeBookmarksField() {
 }
 
 /**
+ * Ensure all prompts have numeric counters: views, likes, bookmarks
+ * Admin-only migration helper. Safe: only updates missing/invalid fields.
+ */
+export async function initializePromptCounters() {
+  try {
+    console.log("🔄 Starting prompt counters migration...");
+    const promptsRef = collection(db, PROMPTS_COLLECTION);
+    const snapshot = await getDocs(promptsRef);
+
+    let updated = 0;
+    const updates = [];
+
+    snapshot.forEach((docSnap) => {
+      const data = docSnap.data();
+      const fixes = {};
+      if (typeof data.views !== "number") fixes.views = 0;
+      if (typeof data.likes !== "number") fixes.likes = 0;
+      if (typeof data.bookmarks !== "number") fixes.bookmarks = 0;
+
+      if (Object.keys(fixes).length > 0) {
+        updates.push(
+          updateDoc(docSnap.ref, {
+            ...fixes,
+            updatedAt: serverTimestamp(),
+          }).catch((err) => console.error(`Error updating ${docSnap.id}:`, err)),
+        );
+        updated++;
+      }
+    });
+
+    if (updates.length > 0) {
+      await Promise.all(updates);
+      console.log(`✅ Prompt counters migration complete! Updated ${updated} prompts`);
+    } else {
+      console.log(`✅ All ${snapshot.size} prompts already have numeric counters`);
+    }
+
+    return { success: true, updated, total: snapshot.size };
+  } catch (error) {
+    console.error("❌ Error in prompt counters migration:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
  * Get all likes by user
  */
 export async function getUserLikes(userId) {

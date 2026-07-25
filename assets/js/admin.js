@@ -15,6 +15,10 @@ import {
   deleteDoc,
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+import {
+  initializeBookmarksField,
+  initializePromptCounters,
+} from "./firestore-service.js";
 
 // ---- DATA LAYER (Firestore) ----
 
@@ -341,7 +345,37 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   window.addEventListener("resize", debounce(drawActivityChart, 300));
+
+  // Setup admin repair counters button
+  setupRepairCountersButton();
 });
+
+function setupRepairCountersButton() {
+  const btn = document.getElementById("repairCountersBtn");
+  if (!btn) return;
+
+  btn.addEventListener("click", async () => {
+    if (!confirm("Run prompt counters repair (admin-only). Proceed?")) return;
+    btn.disabled = true;
+    btn.textContent = "Running...";
+
+    try {
+      const res1 = await initializePromptCounters();
+      const res2 = await initializeBookmarksField();
+      alert(`Repair complete. Counters updated: ${res1.updated || 0}, Bookmarks fixed: ${res2.updated || 0}`);
+      // Refresh data
+      await initializeFirestore();
+      renderDashboard();
+      updateSidebarCounts();
+    } catch (err) {
+      console.error("Repair failed:", err);
+      alert("Repair failed. Check console for details.");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Repair Counters";
+    }
+  });
+}
 
 // ============================================================
 // DARK MODE
