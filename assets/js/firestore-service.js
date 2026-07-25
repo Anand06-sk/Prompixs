@@ -78,6 +78,8 @@ function getUserIdentifier() {
  */
 export async function recordPromptView(promptId) {
   try {
+    // Ensure prompt document exists before updating (safe for first-time prompts)
+    await ensurePromptDocExists(promptId);
     const promptRef = doc(db, PROMPTS_COLLECTION, promptId);
 
     // Use atomic increment
@@ -222,6 +224,8 @@ export async function togglePromptLike(promptId) {
         createdAt: serverTimestamp(),
       });
 
+      // Ensure prompt document exists before incrementing likes
+      await ensurePromptDocExists(promptId);
       await updateDoc(promptRef, {
         likes: increment(1),
         updatedAt: serverTimestamp(),
