@@ -1709,6 +1709,53 @@
           }
         }
 
+        getSafeRedirectPath(rawNext) {
+          const defaultPath = "index.html";
+          if (!rawNext) return defaultPath;
+
+          const normalized = rawNext.trim();
+          if (!normalized) return defaultPath;
+
+          const normalizedLower = normalized.toLowerCase();
+          if (
+            normalizedLower === "404.html" ||
+            normalizedLower === "/404.html" ||
+            normalizedLower.startsWith("/404.html?") ||
+            normalizedLower === "auth/auth.html" ||
+            normalizedLower === "/auth/auth.html" ||
+            normalizedLower.startsWith("auth/auth.html?") ||
+            normalizedLower.startsWith("/auth/auth.html?") ||
+            normalizedLower === "auth/profile.html" ||
+            normalizedLower === "/auth/profile.html" ||
+            normalizedLower.startsWith("auth/profile.html?") ||
+            normalizedLower.startsWith("/auth/profile.html?")
+          ) {
+            console.warn("⚠️ Redirect target is invalid or unsafe, falling back to home:", rawNext);
+            return defaultPath;
+          }
+
+          if (/\/404(?:\.html)?($|\?)/i.test(normalized)) {
+            console.warn("⚠️ Redirect target contains 404, falling back to home:", rawNext);
+            return defaultPath;
+          }
+
+          if (/^https?:\/\//i.test(normalized)) {
+            try {
+              const url = new URL(normalized);
+              if (url.origin !== window.location.origin) {
+                console.warn("⚠️ Redirect target origin mismatch, falling back to home:", normalized);
+                return defaultPath;
+              }
+              return url.pathname.replace(/^\/+/, "") + url.search + url.hash;
+            } catch (error) {
+              console.warn("⚠️ Redirect target parse failed, falling back to home:", normalized, error);
+              return defaultPath;
+            }
+          }
+
+          return normalized.replace(/^\/+/, "");
+        }
+
         completeLogin(firebaseUser) {
           // Firebase authentication is handled in auth.js
           // Redirect to next page or home
@@ -1726,7 +1773,7 @@
           }
 
           const siteRoot = window.location.href.replace(/\/auth\/.*$/, "/");
-          const nextPath = rawNext ? rawNext.replace(/^\/+/, "") : "index.html";
+          const nextPath = this.getSafeRedirectPath(rawNext);
           const resolvedNext = new URL(nextPath, siteRoot).href;
 
           console.log("➡️ Redirecting to:", resolvedNext, "(rawNext=", rawNext, ")");

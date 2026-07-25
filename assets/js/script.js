@@ -308,10 +308,37 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
     return !!currentUser;
   }
 
+  function sanitizeNextRedirect(next) {
+    if (!next) return "index.html";
+
+    const raw = String(next).trim();
+    const lower = raw.toLowerCase();
+
+    if (
+      lower === "404.html" ||
+      lower === "/404.html" ||
+      lower.startsWith("/404.html?") ||
+      /\/404(?:\.html)?($|\?)/i.test(lower) ||
+      lower === "auth/auth.html" ||
+      lower === "/auth/auth.html" ||
+      lower.startsWith("auth/auth.html?") ||
+      lower.startsWith("/auth/auth.html?") ||
+      lower === "auth/profile.html" ||
+      lower === "/auth/profile.html" ||
+      lower.startsWith("auth/profile.html?") ||
+      lower.startsWith("/auth/profile.html?")
+    ) {
+      console.warn("⚠️ sanitizeNextRedirect blocked unsafe target:", next);
+      return "index.html";
+    }
+
+    return raw.replace(/^\/+/, "");
+  }
+
   function redirectToAuth(next = "/", action = "", id = "") {
     // Use absolute path so redirects work from any nested route
     const url = new URL("/auth/auth.html", window.location.origin);
-    if (next) url.searchParams.set("next", next);
+    if (next) url.searchParams.set("next", sanitizeNextRedirect(next));
     if (action) url.searchParams.set("action", action);
     if (id) url.searchParams.set("id", id);
     window.location.href = url.href;
