@@ -2198,7 +2198,7 @@
       onAuthStateChanged(auth, async (user) => {
         if (!user) {
           // User not logged in - redirect to auth page
-          window.location.href = "auth.html?next=profile.html";
+          window.location.href = "auth.html?next=auth/profile.html";
           return;
         }
 

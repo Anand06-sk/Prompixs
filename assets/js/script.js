@@ -322,11 +322,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
       lower === "auth/auth.html" ||
       lower === "/auth/auth.html" ||
       lower.startsWith("auth/auth.html?") ||
-      lower.startsWith("/auth/auth.html?") ||
-      lower === "auth/profile.html" ||
-      lower === "/auth/profile.html" ||
-      lower.startsWith("auth/profile.html?") ||
-      lower.startsWith("/auth/profile.html?")
+      lower.startsWith("/auth/auth.html?")
     ) {
       console.warn("⚠️ sanitizeNextRedirect blocked unsafe target:", next);
       return "index.html";

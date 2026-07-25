@@ -1724,11 +1724,7 @@
             normalizedLower === "auth/auth.html" ||
             normalizedLower === "/auth/auth.html" ||
             normalizedLower.startsWith("auth/auth.html?") ||
-            normalizedLower.startsWith("/auth/auth.html?") ||
-            normalizedLower === "auth/profile.html" ||
-            normalizedLower === "/auth/profile.html" ||
-            normalizedLower.startsWith("auth/profile.html?") ||
-            normalizedLower.startsWith("/auth/profile.html?")
+            normalizedLower.startsWith("/auth/auth.html?")
           ) {
             console.warn("⚠️ Redirect target is invalid or unsafe, falling back to home:", rawNext);
             return defaultPath;
