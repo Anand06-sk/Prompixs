@@ -1144,7 +1144,7 @@
               <div class="form-error" id="loginEmailError"></div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group password-field-wrapper">
               <label class="form-label" for="loginPassword">Password</label>
               <input
                 type="password"
@@ -1154,6 +1154,15 @@
                 autocomplete="current-password"
                 required
               />
+              <button
+                type="button"
+                class="password-toggle-btn"
+                id="loginPasswordToggle"
+                aria-label="Show password"
+                title="Show password"
+              >
+                <i class="fa-solid fa-eye"></i>
+              </button>
               <div class="form-error" id="loginPasswordError"></div>
             </div>
 
@@ -1446,6 +1455,8 @@
           console.log("✅ setupTabSwitching() completed");
           this.setupFormHandlers();
           console.log("✅ setupFormHandlers() completed");
+          this.setupPasswordToggles();
+          console.log("✅ setupPasswordToggles() completed");
           this.setupSocialButtons();
           console.log("✅ setupSocialButtons() completed");
           this.setupPasswordReset();
@@ -1557,6 +1568,28 @@
 
           // The submit buttons already trigger the form's submit event naturally.
           // No extra click handler is needed and duplicate submissions can occur.
+        }
+
+        setupPasswordToggles() {
+          const toggleButtons = document.querySelectorAll(".password-toggle-btn");
+          toggleButtons.forEach((btn) => {
+            btn.addEventListener("click", () => {
+              const wrapper = btn.closest(".password-field-wrapper");
+              if (!wrapper) return;
+
+              const input = wrapper.querySelector("input[type='password'], input[type='text']");
+              if (!input) return;
+
+              const show = input.type === "password";
+              input.type = show ? "text" : "password";
+              const icon = btn.querySelector("i");
+              if (icon) {
+                icon.className = `fa-solid fa-${show ? "eye-slash" : "eye"}`;
+              }
+              btn.setAttribute("aria-label", show ? "Hide password" : "Show password");
+              btn.setAttribute("title", show ? "Hide password" : "Show password");
+            });
+          });
         }
 
         validateEmail(email) {
