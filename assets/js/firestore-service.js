@@ -78,9 +78,13 @@ function getUserIdentifier() {
  */
 export async function recordPromptView(promptId) {
   try {
-    // Ensure prompt document exists before updating (safe for first-time prompts)
-    await ensurePromptDocExists(promptId);
     const promptRef = doc(db, PROMPTS_COLLECTION, promptId);
+    const promptSnap = await getDoc(promptRef);
+
+    if (!promptSnap.exists()) {
+      console.warn(`Prompt ${promptId} does not exist; skipping view increment from client.`);
+      return { success: false, error: "prompt-not-found" };
+    }
 
     // Use atomic increment
     await updateDoc(promptRef, {
@@ -162,7 +166,11 @@ export async function getPromptMetrics(promptId) {
  * Check if current user (authenticated or anonymous) has liked a prompt
  */
 export async function getUserLikeStatus(promptId) {
-  const userIdentifier = getUserIdentifier();
+  // Only authenticated users can have per-user like docs according to security rules
+  const user = auth.currentUser;
+  if (!user) return { liked: false };
+
+  const userIdentifier = user.uid;
 
   try {
     const likeDocId = `${userIdentifier}_${promptId}`;
@@ -189,8 +197,11 @@ export async function getUserLikeStatus(promptId) {
  *   - Increment likes count
  */
 export async function togglePromptLike(promptId) {
-  const userIdentifier = getUserIdentifier();
   const user = auth.currentUser;
+  if (!user) {
+    return { success: false, error: "not-authenticated" };
+  }
+  const userIdentifier = user.uid;
 
   try {
     const likeDocId = `${userIdentifier}_${promptId}`;
@@ -224,8 +235,13 @@ export async function togglePromptLike(promptId) {
         createdAt: serverTimestamp(),
       });
 
-      // Ensure prompt document exists before incrementing likes
-      await ensurePromptDocExists(promptId);
+      // Ensure prompt exists first (do not create prompt docs from client-side)
+      const promptSnap = await getDoc(promptRef);
+      if (!promptSnap.exists()) {
+        console.warn(`Prompt ${promptId} does not exist; cannot increment likes from client.`);
+        return { success: false, error: "prompt-not-found" };
+      }
+
       await updateDoc(promptRef, {
         likes: increment(1),
         updatedAt: serverTimestamp(),
@@ -257,20 +273,13 @@ async function ensurePromptDocExists(promptId) {
   try {
     const promptRef = doc(db, PROMPTS_COLLECTION, promptId);
     const promptSnap = await getDoc(promptRef);
-
     if (!promptSnap.exists()) {
-      // Create document with bookmarks initialized
-      await setDoc(promptRef, {
-        id: promptId,
-        views: 0,
-        likes: 0,
-        bookmarks: 0,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      });
-      console.log(`✅ Created prompt document: ${promptId}`);
-      return true;
-    } else if (promptSnap.data().bookmarks === undefined) {
+      // Do not create prompt documents from the client — creation is restricted to admins
+      console.log(`Prompt ${promptId} missing; client will not create it (admin-only).`);
+      return false;
+    }
+
+    if (promptSnap.data().bookmarks === undefined) {
       // Document exists but bookmarks field missing - add it
       await updateDoc(promptRef, {
         bookmarks: 0,
@@ -278,7 +287,8 @@ async function ensurePromptDocExists(promptId) {
       console.log(`✅ Added bookmarks field to: ${promptId}`);
       return true;
     }
-    return false;
+
+    return true;
   } catch (error) {
     console.error("Error ensuring prompt doc:", error);
     throw error;
@@ -291,11 +301,20 @@ async function ensurePromptDocExists(promptId) {
  */
 export async function incrementBookmarkCount(promptId) {
   try {
-    // First ensure the document and bookmarks field exist
-    await ensurePromptDocExists(promptId);
+    const promptRef = doc(db, PROMPTS_COLLECTION, promptId);
+    const promptSnap = await getDoc(promptRef);
+
+    if (!promptSnap.exists()) {
+      console.warn(`Prompt ${promptId} does not exist; cannot increment bookmarks from client.`);
+      return { success: false, error: "prompt-not-found" };
+    }
+
+    // Ensure bookmarks field exists
+    if (promptSnap.data().bookmarks === undefined) {
+      await updateDoc(promptRef, { bookmarks: 0 });
+    }
 
     // Now safely increment
-    const promptRef = doc(db, PROMPTS_COLLECTION, promptId);
     await updateDoc(promptRef, {
       bookmarks: increment(1),
       updatedAt: serverTimestamp(),
@@ -314,25 +333,25 @@ export async function incrementBookmarkCount(promptId) {
  */
 export async function decrementBookmarkCount(promptId) {
   try {
-    // First ensure the document and bookmarks field exist
-    await ensurePromptDocExists(promptId);
-
     const promptRef = doc(db, PROMPTS_COLLECTION, promptId);
     const promptSnap = await getDoc(promptRef);
 
-    if (promptSnap.exists()) {
-      const currentBookmarks = promptSnap.data().bookmarks || 0;
+    if (!promptSnap.exists()) {
+      console.warn(`Prompt ${promptId} does not exist; cannot decrement bookmarks from client.`);
+      return { success: false, error: "prompt-not-found" };
+    }
 
-      // Only decrement if greater than 0
-      if (currentBookmarks > 0) {
-        await updateDoc(promptRef, {
-          bookmarks: increment(-1),
-          updatedAt: serverTimestamp(),
-        });
-        console.log(`✅ Bookmark decremented for: ${promptId}`);
-      } else {
-        console.log(`⚠️ Bookmark count already 0 for: ${promptId}`);
-      }
+    const currentBookmarks = promptSnap.data().bookmarks || 0;
+
+    // Only decrement if greater than 0
+    if (currentBookmarks > 0) {
+      await updateDoc(promptRef, {
+        bookmarks: increment(-1),
+        updatedAt: serverTimestamp(),
+      });
+      console.log(`✅ Bookmark decremented for: ${promptId}`);
+    } else {
+      console.log(`⚠️ Bookmark count already 0 for: ${promptId}`);
     }
 
     return { success: true };
@@ -383,10 +402,15 @@ export function listenToPromptMetrics(promptId, callback) {
  * Calls callback when user likes/unlikes
  */
 export function listenToUserLikeStatus(promptId, callback) {
-  const userIdentifier = getUserIdentifier();
+  // Only set up like listeners for authenticated users (rules require signedIn for like docs)
+  const user = auth.currentUser;
+  if (!user) {
+    // Return a no-op unsubscribe
+    return () => {};
+  }
 
   try {
-    const likeDocId = `${userIdentifier}_${promptId}`;
+    const likeDocId = `${user.uid}_${promptId}`;
     const likeRef = doc(db, LIKES_COLLECTION, likeDocId);
 
     const unsubscribe = onSnapshot(
