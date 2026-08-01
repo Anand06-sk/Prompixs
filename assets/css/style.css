@@ -1121,6 +1121,61 @@ body.dark .category-chip.active {
   scroll-snap-align: start;
 }
 
+@media (min-width: 901px) {
+  #mostLiked .row-scroll,
+  #mostViewed .row-scroll,
+  #mostBookmarked .row-scroll {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    overflow: visible;
+    align-items: start;
+  }
+
+  #mostLiked .row-scroll .prompt-card,
+  #mostViewed .row-scroll .prompt-card,
+  #mostBookmarked .row-scroll .prompt-card {
+    width: 100%;
+    max-width: 260px;
+    justify-self: center;
+    scroll-snap-align: unset;
+  }
+
+  .row-scroll .prompt-card .card-img-wrap,
+  .masonry-grid .prompt-card .card-img-wrap {
+    aspect-ratio: 4 / 5;
+    min-height: 0;
+  }
+
+  .row-scroll .prompt-card img,
+  .masonry-grid .prompt-card img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+}
+
+@media (max-width: 900px) {
+  #mostLiked .row-scroll,
+  #mostViewed .row-scroll,
+  #mostBookmarked .row-scroll {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 14px;
+    padding-bottom: 6px;
+  }
+
+  #mostLiked .row-scroll .prompt-card,
+  #mostViewed .row-scroll .prompt-card,
+  #mostBookmarked .row-scroll .prompt-card {
+    width: 220px;
+    max-width: 220px;
+    flex: 0 0 220px;
+  }
+}
+
 /* ---- Prompt Card (Premium Pinterest Style) ---- */
 .prompt-card {
   position: relative;

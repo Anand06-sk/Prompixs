@@ -1254,7 +1254,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
   let authPopupHideTimer = null;
 
   function hideAuthPopup() {
-    if (!authPopup || !authPopup.classList.contains("visible")) return;
+    if (!authPopup) return;
     authPopup.classList.remove("visible");
     authPopup.style.pointerEvents = "none";
     clearTimeout(authPopupHideTimer);
@@ -1266,7 +1266,17 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
   }
 
   if (authPopupClose) {
-    authPopupClose.addEventListener("click", hideAuthPopup);
+    authPopupClose.addEventListener("click", (event) => {
+      event.preventDefault();
+      hideAuthPopup();
+    });
+  } else {
+    document.addEventListener("click", (event) => {
+      if (event.target.closest("#authPopupClose")) {
+        event.preventDefault();
+        hideAuthPopup();
+      }
+    });
   }
 
   if (authPopupAction) {
@@ -1275,6 +1285,8 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/fi
       redirectToAuth(window.location.pathname + window.location.search + window.location.hash);
     });
   }
+
+  window.hideAuthPopup = hideAuthPopup;
 
   function showAuthPopup(message = "Please log in to continue.", buttonText = "Log in / Sign up") {
     if (!authPopup || !authPopupAction) return;
