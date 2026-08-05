@@ -1,0 +1,154 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helpers
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function isAdmin() {
+      return request.auth.uid != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+
+    // Allow updates that only change a specific set of fields (used for counters)
+    function promptCounterUpdateOnly(fields) {
+      return request.resource.data.diff(resource.data).changedKeys().hasOnly(fields)
+        && request.resource.data.updatedAt is timestamp;
+    }
+
+    // USER PROFILES
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+
+      allow create: if isOwner(uid)
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.keys().hasOnly([
+          "uid","email","displayName","photoURL","emailVerified","authProvider",
+          "createdAt","updatedAt","bookmarkCount","totalViews","dateOfBirth","gender","bio"
+        ])
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.updatedAt is timestamp
+        && request.resource.data.displayName is string
+        && request.resource.data.photoURL is string
+        && request.resource.data.emailVerified is bool
+        && request.resource.data.authProvider is string
+        && request.resource.data.bookmarkCount is int
+        && request.resource.data.totalViews is int;
+
+      allow update: if (isOwner(uid) || isAdmin())
+        && request.resource.data.keys().hasOnly([
+          "uid","email","displayName","photoURL","emailVerified","authProvider",
+          "createdAt","updatedAt","bookmarkCount","totalViews","dateOfBirth","gender","bio"
+        ])
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.email == resource.data.email
+        && request.resource.data.authProvider == resource.data.authProvider
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.bookmarkCount == resource.data.bookmarkCount
+        && request.resource.data.totalViews == resource.data.totalViews
+        && request.resource.data.emailVerified == resource.data.emailVerified
+        && request.resource.data.updatedAt is timestamp
+        && request.resource.data.displayName == resource.data.displayName
+        && request.resource.data.photoURL == resource.data.photoURL
+        && (request.resource.data.dateOfBirth == resource.data.dateOfBirth
+          || request.resource.data.dateOfBirth is string
+          || request.resource.data.dateOfBirth == null)
+        && (request.resource.data.gender == resource.data.gender
+          || request.resource.data.gender is string
+          || request.resource.data.gender == null)
+        && request.resource.data.bio is string;
+
+      allow delete: if isOwner(uid) || isAdmin();
+    }
+
+    // PER-USER BOOKMARKS (subcollection of users)
+    match /users/{uid}/bookmarks/{bookmarkId} {
+      allow read, write: if isOwner(uid) || isAdmin();
+    }
+
+    // GLOBAL USER_BOOKMARKS (index for bookmarks)
+    match /user_bookmarks/{bookmarkId} {
+      allow read: if (signedIn() && resource.data.userId == request.auth.uid) || isAdmin();
+
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.promptId is string
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.keys().hasOnly(["createdAt", "promptId", "userId"]);
+
+      allow delete: if (signedIn() && resource.data.userId == request.auth.uid) || isAdmin();
+      allow update: if false;
+    }
+
+    // LIKES: per-user like documents
+    match /likes/{likeId} {
+      allow read: if signedIn();
+
+      // Only signed-in (non-anonymous) users may create a like document for themselves
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.isAnonymous == false
+        && request.resource.data.promptId is string
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.keys().hasOnly(["createdAt", "isAnonymous", "promptId", "userId"]);
+
+      // Users may delete their own like; admins can delete any
+      allow delete: if (signedIn() && resource.data.userId == request.auth.uid) || isAdmin();
+      allow update: if false;
+    }
+
+    // PROMPTS: public reads; writes are admin-only except safe counter updates
+    match /prompts/{promptId} {
+      // Everyone can read prompt documents
+      allow read: if true;
+
+      // Only admins may create, fully update, or delete prompt documents
+      allow create, update, delete: if isAdmin();
+
+      // Allow incrementing views from client (no auth required) — only 'views' and 'updatedAt' may change
+      allow update: if promptCounterUpdateOnly(["views","updatedAt"])
+        && request.resource.data.views == resource.data.views + 1
+        && request.resource.data.views >= 0
+        && request.resource.data.likes == resource.data.likes
+        && request.resource.data.bookmarks == resource.data.bookmarks;
+
+      // Allow authenticated users to increment/decrement likes (per-user like docs enforce ownership)
+      allow update: if signedIn()
+        && promptCounterUpdateOnly(["likes","updatedAt"])
+        && (
+          request.resource.data.likes == resource.data.likes + 1 ||
+          request.resource.data.likes == resource.data.likes - 1
+        )
+        && request.resource.data.likes >= 0
+        && request.resource.data.views == resource.data.views
+        && request.resource.data.bookmarks == resource.data.bookmarks;
+
+      // Allow authenticated users to increment/decrement bookmarks (bookmarks index + per-user checks enforce ownership)
+      allow update: if signedIn()
+        && promptCounterUpdateOnly(["bookmarks","updatedAt"])
+        && (
+          request.resource.data.bookmarks == resource.data.bookmarks + 1 ||
+          request.resource.data.bookmarks == resource.data.bookmarks - 1
+        )
+        && request.resource.data.bookmarks >= 0
+        && request.resource.data.views == resource.data.views
+        && request.resource.data.likes == resource.data.likes;
+    }
+
+    // CATEGORIES and adminActivityLog: admin writes only
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /adminActivityLog/{logId} {
+      allow read, create, update, delete: if isAdmin();
+    }
+  }
+}
