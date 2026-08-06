@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Profile — PromptVerse</title>
+    <title>My Profile — Prompixs</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -350,24 +350,11 @@
       }
 
       .bookmark-actions {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        z-index: 2;
+        display: none !important;
       }
 
       .bookmark-action-btn {
-        width: 36px;
-        height: 36px;
-        border: 0;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.9);
-        color: var(--text);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.16);
+        display: none !important;
       }
 
       .bookmark-action-btn:hover {
@@ -703,7 +690,7 @@
         max-width: 900px;
         width: 100%;
         max-height: 90vh;
-        overflow: hidden;
+        overflow: auto;
         position: relative;
       }
 
@@ -1053,6 +1040,7 @@
 
         .modal-info {
           padding: 16px;
+          overflow-y: visible;
         }
 
         .modal-close {
@@ -1065,6 +1053,86 @@
 
         .modal-info h3 {
           font-size: 1.3rem;
+        }
+
+        .modal-actions,
+        .modal-ai-actions {
+          display: block;
+          gap: 12px;
+        }
+
+        .modal-actions .btn,
+        .modal-ai-actions .btn {
+          display: block;
+          width: 100%;
+          font-size: 0.9rem;
+          padding: 12px 14px;
+          margin-bottom: 8px;
+        }
+
+        .modal {
+          max-height: calc(100vh - 32px);
+          overflow-y: auto;
+        }
+
+        .modal-overlay {
+          align-items: flex-start;
+          padding: 12px;
+        }
+
+        .modal-image-wrap {
+          min-height: 200px;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .modal-info {
+          overflow-y: visible !important;
+          max-height: none !important;
+          min-height: 0 !important;
+        }
+
+        .modal-actions,
+        .modal-ai-actions {
+          display: flex !important;
+          flex-direction: column !important;
+          flex-wrap: nowrap !important;
+          gap: 10px !important;
+          width: 100% !important;
+          opacity: 1 !important;
+          visibility: visible !important;
+        }
+
+        .modal-actions .btn,
+        .modal-ai-actions .btn {
+          display: inline-flex !important;
+          width: 100% !important;
+          min-width: 0 !important;
+          font-size: 0.88rem !important;
+          padding: 11px 14px !important;
+          margin-bottom: 10px !important;
+          opacity: 1 !important;
+          visibility: visible !important;
+        }
+
+        .modal {
+          max-height: calc(100vh - 32px) !important;
+          overflow-y: auto !important;
+          overflow-x: hidden !important;
+        }
+
+        .modal-overlay {
+          align-items: flex-start !important;
+          padding: 12px !important;
+        }
+
+        .modal-image-wrap {
+          min-height: 180px !important;
+          max-height: 220px !important;
+        }
+
+        .modal-prompt-box {
+          max-height: 180px !important;
         }
       }
     
@@ -2159,7 +2227,7 @@
         
         try {
           const { db } = await import("../assets/js/firebase-config.js");
-          const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js");
+          const { doc, setDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js");
           
           if (!currentUser) return;
           
@@ -2172,7 +2240,7 @@
             dateOfBirth: dob,
             gender: gender,
             bio: bio,
-            updatedAt: new Date().toISOString()
+            updatedAt: serverTimestamp()
           }, { merge: true });
           
           console.log("Profile updated successfully");
@@ -2327,11 +2395,6 @@
               <div class="bookmark-image">
                 <img src="${bookmark.image || "https://via.placeholder.com/200x160"}" alt="${bookmark.title || "Prompt"}" />
                 <div class="bookmark-overlay"></div>
-                <div class="bookmark-actions">
-                  <button class="bookmark-action-btn" type="button" aria-label="Open prompt actions">
-                    <i class="fa-solid fa-ellipsis-h"></i>
-                  </button>
-                </div>
                 <div class="bookmark-metrics" aria-label="Prompt metrics">
                   <span class="bookmark-metric"><i class="fa-solid fa-eye"></i> ${metrics.views || 0}</span>
                   <span class="bookmark-metric"><i class="fa-solid fa-heart"></i> ${metrics.likes || 0}</span>
@@ -2800,7 +2863,7 @@
             dateOfBirth: dob,
             gender: gender,
             bio: bio || "",
-            updatedAt: new Date().toISOString()
+            updatedAt: serverTimestamp()
           }, { merge: true });
           
           console.log("Profile updated successfully");
